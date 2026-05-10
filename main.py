@@ -22,18 +22,21 @@ class MType(Enum):
 # TODO: Make these configurable from the command-line/UI
 PLF: int    = 50                # Frequency of the powerline, in Hertz
 NPLC: float = 10                # Number of powerline cycles between measurements
-N: int      = 100               # Number of measurements to take (Set to -1 for infinite)
+N: int      = 100              # Number of measurements to take (Set to -1 for infinite)
 TYPE: MType = MType.DC_VOLTAGE  # Type of the measurement to take
 
-# Data settings
+# Data and display settings
 REALTIME_GRAPH: bool = True        # Should we plot a real-time graph?
 SHOW_GRAPH: bool     = True        # Should we show a graph at the end?
 SAVE_GRAPH: bool     = True        # Should we save a graph?
+SAVE_DATA: bool      = True        # Should we save the data?
 GRAPH_FILE: str      = "graph.png" # Name of the file to save the graph to
+DATA_FILE: str       = "data.csv"  # Name of the file to save the data to
 
 # Stuff that needs to be generated from settings above
 DELAY_TIME = 1.5 * (NPLC / PLF) # Multiply by 1.5 to give a good margin
 
+times = []                       # Store the time each measurement was taken at (relative to start)
 measurements = []                # Store the measurements we're about to take
 mpl.rcParams['toolbar'] = 'None' # Disable graph toolbar
 plt.style.use('dark_background') # Don't burn my retinas
@@ -45,12 +48,14 @@ with serial.Serial('/dev/ttyUSB0', 9600, timeout=3) as ser:
     time.sleep(DELAY_TIME) # Make sure the first measurement has had time to settle
 
     i = 0
+    start_time = time.time()
     while i != N:
-        ser.write(b':SENS:DATA?\n') # Take a measuremeny
+        ser.write(b':SENS:DATA?\n') # Take a measurement
         measurements.append(float(ser.readline()))
+        times.append(time.time() - start_time)
         if N > 0:
             i += 1
-        plt.plot(measurements, color='red')
+        plt.plot(times, measurements, color='red')
         if REALTIME_GRAPH:
             plt.pause(DELAY_TIME)
         else:
@@ -61,3 +66,6 @@ if SAVE_GRAPH:
 
 if SHOW_GRAPH:
     plt.show()
+
+if SAVE_DATA:
+    np.savetxt(DATA_FILE, np.array((times, measurements)).T, delimiter=',')
