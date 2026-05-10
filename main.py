@@ -22,7 +22,7 @@ class MType(Enum):
 # TODO: Make these configurable from the command-line/UI
 PLF: int    = 50                # Frequency of the powerline, in Hertz
 NPLC: float = 10                # Number of powerline cycles between measurements
-N: int      = 100              # Number of measurements to take (Set to -1 for infinite)
+N: int      = 100               # Number of measurements to take (Set to -1 for infinite)
 TYPE: MType = MType.DC_VOLTAGE  # Type of the measurement to take
 
 # Data and display settings
