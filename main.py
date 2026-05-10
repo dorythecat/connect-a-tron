@@ -60,4 +60,4 @@ if SAVE_GRAPH:
     plt.savefig(GRAPH_FILE)
 
 if SHOW_GRAPH:
-    plt.plot()
+    plt.show()
