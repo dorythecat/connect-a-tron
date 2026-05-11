@@ -26,12 +26,18 @@ app = FastAPI(
     }
 )
 
+# TODO: Load instrumets from a configuration file
 keithley2000 = keithley.Keithley2000()
 
 @app.get("/system/interfaces", tags=["System"])
-async def root():
+async def interfaces():
     return {
             "dmm": [
                 keithley2000.id
             ]
     }
+
+@app.get("/dmm/keithley/measure")
+async def keithley_measure() -> float:
+    keithley2000.measure_set()
+    return keithley2000.measure_get()
