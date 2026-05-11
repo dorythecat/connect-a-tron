@@ -30,7 +30,7 @@ app = FastAPI(
 keithley2000 = keithley.Keithley2000()
 
 @app.get("/system/interfaces", tags=["System"])
-async def interfaces():
+async def interfaces() -> dict:
     return {
             "dmm": [
                 keithley2000.id
@@ -41,3 +41,8 @@ async def interfaces():
 async def keithley_measure() -> float:
     keithley2000.measure_set()
     return keithley2000.measure_get()
+
+@app.post("/dmm/keithley/text/display")
+async def text_display(enable: bool = True, text: str = "") -> None:
+    keithley2000.display = enable
+    keithley2000.text = text
