@@ -15,19 +15,19 @@ class MType(Enum):
     CONT    = 11
 
 class DMM:
-    def __init__(self, port: str = "/dev/ttyUSB0", baud_rate: int = 9600, plf: int = 50) -> None:
+    def __init__(self, port: str, baud_rate: int) -> None:
         # Given settings
         self._port: str = port
         self._baud_rate: int = baud_rate
-        self._plf: int = plf
 
         # Generated settings, or given settings through other functions
+        self._plf: int = 50
         self._nplc: float = 10
         self._typ: MType = MType.DC_VOLT
-        self._delay_time: float = 1.5 * self.nplc / self.plf
+        self._delay_time: float = self.nplc / self.plf
 
         # Connect through serial
-        self._ser = serial.Serial(self.port, self.baud_rate, timeout=3)
+        self._ser = serial.Serial(self.port, self.baud_rate)
 
     @property
     def port(self) -> str:
@@ -57,12 +57,36 @@ class DMM:
     def id(self) -> str: # This should be overriden by child classes, always
         return "Generic DMM"
 
+    @property
+    def beeper(self) -> bool:
+        return True
+
+    @beeper.setter
+    def beeper(self, value: bool) -> None:
+        pass
+
+    @property
+    def display(self) -> bool:
+        return True
+
+    @display.setter
+    def display(self, value: bool) -> None:
+        pass
+
+    @property
+    def text(self) -> str:
+        return ""
+
+    @text.setter
+    def text(self, value: str) -> None:
+        pass
+
     def measure_set(self, nplc: float, typ: MType) -> None:
         self._nplc = nplc
         self._typ = typ
-        self._delay_time = 1.5 * self.nplc / self.plf
+        self._delay_time = self.nplc / self.plf
 
-    def measure_raw(self) -> float:
+    def measure_get(self) -> float:
         pass
 
     def measure_avg(self, n: int = 2) -> float:
@@ -71,7 +95,7 @@ class DMM:
     def continuous_set(self, nplc: float, typ: MType) -> None:
         self._nplc = nplc
         self._typ = typ
-        self._delay_time = 1.5 * self.nplc / self.plf
+        self._delay_time = self.nplc / self.plf
 
     def continuous_get(self) -> float:
         pass
