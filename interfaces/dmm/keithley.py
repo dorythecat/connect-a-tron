@@ -21,7 +21,7 @@ class Keithley2000(dmm.DMM):
         self._ser.write(b'*RST\n*IDN?\n') # Reset everything and query the ID
         return self._ser.readline().decode() # Output the decoded ID
 
-    def measure_set(self, nplc: float, typ: dmm.MType) -> None:
+    def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT) -> None:
         """
         Configures the DMM to use the given settings for all following single measurements.
 
@@ -69,7 +69,7 @@ class Keithley2000(dmm.DMM):
         self._ser.write(b':INIT:CONT OFF\n') # Stop continuous measurement
         return avg / n # Return the average
 
-    def continuous_set(self, nplc: float, typ: dmm.MType) -> None:
+    def continuous_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT) -> None:
         """
         Configures the DMM to take continuous measurements with the settings provided.
 
