@@ -58,8 +58,6 @@ class DMM:
         return "Generic DMM"
 
     def measure_set(self, nplc: float, typ: MType) -> None:
-        if nplc < 0.01 or nplc > 10:
-            raise AttributeError("NPLC out of range!")
         self._nplc = nplc
         self._typ = typ
         self._delay_time = 1.5 * self.nplc / self.plf
@@ -71,8 +69,6 @@ class DMM:
         pass
 
     def continuous_set(self, nplc: float, typ: MType) -> None:
-        if nplc < 0.01 or nplc > 10:
-            raise AttributeError("NPLC out of rangee")
         self._nplc = nplc
         self._typ = typ
         self._delay_time = 1.5 * self.nplc / self.plf

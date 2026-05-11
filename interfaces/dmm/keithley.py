@@ -29,6 +29,8 @@ class Keithley2000(dmm.DMM):
         :param typ: Type of measurement to make
         :raises AttributeError: If nplc is out of range 
         """
+        if nplc < 0.01 or nplc > 10:
+            raise AttributeError("NPLC out of range!")
         super().measure_set(nplc, typ)
 
         self._ser.write(b'*RST\n') # Reset everything
@@ -77,6 +79,8 @@ class Keithley2000(dmm.DMM):
         :param type: Type of measurement to make
         :raises AttributeError: If nplc is out of range
         """
+        if nplc < 0.01 or nplc > 10:
+            raise AttributeError("NPLC out of range!")
         super().continuous_set(nplc, typ)
 
         self._ser.write(b'*RST\n') # Reset everything
