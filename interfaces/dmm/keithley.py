@@ -16,8 +16,9 @@ class Keithley2000(dmm.DMM):
 
         super().__init__(port, baud_rate)
 
-        self._ser.write(b':SYST:BEEP:STAT 0\n')
+        self._ser.write(b':SYST:BEEP:STAT 0\n') # Disable beeper by default
 
+        # Get current powerline frequency
         self._ser.write(b':SYST:LFR?\n')
         self._plf = int(self._ser.readline().decode())
 
@@ -51,7 +52,15 @@ class Keithley2000(dmm.DMM):
 
     @text.setter
     def text(self, value: str = "") -> None:
-        self._ser.write(f':DISP:TEXT:DATA "{value}"\n'.encode())
+        if value == "":
+            self._ser.write(b':DISP:TEXT:STAT 0\n')
+            return
+        self._ser.write(b':DISP:TEXT:STAT 1\n')
+        self._ser.write(f':DISP:TEXT:DATA "{value[:12]}"\n'.encode())
+        while len(value) > 12:
+            time.sleep(0.5) # TODO: This should be a setting? idrk, also probably adding a "loop" feature?
+            value = value[1:]
+            self._ser.write(f':DISP:TEXT:DATA "{value[:12]}"\n'.encode())
 
     def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT) -> None:
         """
