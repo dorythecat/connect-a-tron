@@ -81,6 +81,26 @@ class DMM:
     def text(self, value: str) -> None:
         pass
 
+    @property
+    def input(self) -> bool: # True means front, False means back
+        return True
+
+    @property
+    def autozero(self) -> bool:
+        return True
+
+    @autozero.setter
+    def autozero(self, value: bool) -> None:
+        pass
+
+    @property
+    def key_press(self) -> int:
+        return -1
+
+    @key_press.setter
+    def key_press(self, value: int) -> None:
+        pass
+
     def measure_set(self, nplc: float, typ: MType) -> None:
         self._nplc = nplc
         self._typ = typ

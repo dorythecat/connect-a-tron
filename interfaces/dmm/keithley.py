@@ -62,6 +62,31 @@ class Keithley2000(dmm.DMM):
             value = value[1:]
             self._ser.write(f':DISP:TEXT:DATA "{value[:12]}"\n'.encode())
 
+    @property
+    def input(self) -> bool:
+        self._ser.write(b':SYST:FRSW?\n')
+        return bool(self._ser.readline().decode())
+
+    @property
+    def autozero(self) -> bool:
+        self._ser.write(b':SYST:AZER:STAT?\n')
+        return bool(self._ser.readline().decode())
+
+    @autozero.setter
+    def autozero(self, value: bool) -> None:
+        self._ser.write(f':SYST:AZER:STAT {int(value)}\n'.encode())
+
+    @property
+    def key_press(self) -> int:
+        self._ser.write(b':SYST:KEY?\n')
+        return int(self._ser.readline().decode())
+
+    @key_press.setter
+    def key_press(self, value: int) -> None:
+        if value < 1 or value > 31:
+            raise AttributeError("Invalid key number provided!")
+        self._ser.write(f':SYST:KEY {value}\n'.encode())
+
     def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT) -> None:
         """
         Configures the DMM to use the given settings for all following single measurements.
