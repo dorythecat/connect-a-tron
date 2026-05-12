@@ -109,17 +109,18 @@ class Keithley2000(dmm.DMM):
             raise AttributeError("Threshold out of range!")
         super().measure_set(nplc, typ, samples)
 
-        self._ser.write(b'*RST\n*CLS\n:INIT:CONT OFF\n:ABORT\n') # Reset everything
+        self._ser.write(b'*RST\n*CLS\n') # Reset everything
         func = ["VOLT:DC", "VOLT:AC", "CURR:DC", "CURR:AC", "RES", "FRES", "PER", "FREQ", "TEMP", "DIOD", "CONT"][typ.value - 1]
         self._ser.write(f':SENS:FUNC "{func}"\n'.encode()) # Set the desired function
-        if typ.value < 8: # These settings can't be set for Frequency, Period, Diode, and Continuity measurements
-            self._ser.write(f':SENS:{func}:NPLC {nplc}\n'.encode()) # Set NPLC
+        if typ.value < 7: # These settings can't be set for Temperature (the manual begs to differ, but it gives a -113 "Undefined header" error), Frequency, Period, Diode, and Continuity measurements
+            if typ.value not in [2, 4]: # Not applicable to AC measurements, even though the documentation says otherwise, we'll get a -221 "Settings conflict" error
+                self._ser.write(f':SENS:{func}:NPLC {nplc}\n'.encode()) # Set NPLC
             self._ser.write(f':SENS:{func}:AVER:COUN {samples}\n'.encode()) # Set number of samples the filter will take
             self._ser.write(f':SENS:{func}:AVER:TCON {"MOV" if mov else "REP"}\n'.encode()) # Set the apropiate type of filter to be used
             self._ser.write(f':SENS:{func}:AVER:STAT {int(samples > 1)}\n'.encode()) # Turn on averaging filter only if samples > 1
-        if typ.value != 11: # Can't be set for Continuity measurements
+        if typ.value < 10: # Can't be set for Diode and Continuity measurements
             self._ser.write(f':SENS:{func}:DIG {digits}\n'.encode()) # Set digits
-        else: # Set this only for continuity measurements
+        elif typ.value == 11: # Set this only for continuity measurements only
             self._ser.write(f':SENS:{func}:THR {thr}\n'.encode()) # Set continuity threshold
 
     def measure_get(self) -> float:
