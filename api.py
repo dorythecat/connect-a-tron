@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path
+from fastapi import FastAPI, Path, Query
 from pydantic import BaseModel
 from typing import Annotated
 from enum import Enum
@@ -50,11 +50,11 @@ async def keithley2000_id() -> str:
 @app.get("/dmm/keithley2000/measure/{typ}", tags=["DMM"])
 async def keithley2000_measure(
         typ: Annotated[int, Path(title="Type of measurement to take", ge=1, le=11)],
-        nplc: Annotated[float, Path(title="Number of powerline cycles per measurement", ge=0.01, le=10)] = 10,
-        samples: Annotated[int, Path(title="Number of samples to average together", ge=1, le=100)] = 1,
-        mov: Annotated[bool, Path(title="Wether to use a moving filter (True) or a repeat filter (False)")] = False,
-        digits: Annotated[int, Path(title="Number of digits to display", ge=4, le=7)] = 7,
-        thr: Annotated[int, Path(title="Threshold for continuity, in Ohms", ge=1, le=1000)] = 10
+        nplc: Annotated[float, Query(title="Number of powerline cycles per measurement", ge=0.01, le=10)] = 10,
+        samples: Annotated[int, Query(title="Number of samples to average together", ge=1, le=100)] = 1,
+        mov: Annotated[bool, Query(title="Wether to use a moving filter (True) or a repeat filter (False)")] = False,
+        digits: Annotated[int, Query(title="Number of digits to display", ge=4, le=7)] = 7,
+        thr: Annotated[int, Query(title="Threshold for continuity, in Ohms", ge=1, le=1000)] = 10
     ) -> float:
     keithley2000.measure_set(nplc, dmm.MType(typ), samples, mov, digits, thr)
     return keithley2000.measure_get()
