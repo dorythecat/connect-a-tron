@@ -87,23 +87,40 @@ class Keithley2000(dmm.DMM):
             raise AttributeError("Invalid key number provided!")
         self._ser.write(f':SYST:KEY {value}\n'.encode())
 
-    def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT) -> None:
+    def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT, samples: int = 1, mov: bool = False, digits: int = 7, thr: int = 10) -> None:
         """
         Configures the DMM to use the given settings for all following single measurements.
 
         :param nplc: Number of powerline cycles to sample (0.01 to 10)
         :param typ: Type of measurement to make
-        :raises AttributeError: If nplc is out of range 
+        :param samples: How many raw measurements to average for each queried measurement
+        :param filt: Wether to use a moving filter, uses repeat filter if false (See "Filter types" on the Keithley 2000 for more information)
+        :param digits: How many digits of precision to display (only affects front panel view, not returned value)
+        :param thr: Threshold for continuity, in Ohms
+        :raises AttributeError: If nplc, samples, digits, or threshold are out of range 
         """
         if nplc < 0.01 or nplc > 10:
             raise AttributeError("NPLC out of range!")
-        super().measure_set(nplc, typ)
+        if samples < 1 or samples > 100:
+            raise AttributeError("Samples out of range!")
+        if digits < 4 or digits > 7:
+            raise AttributeError("Digits out of range!")
+        if thr < 1 or thr > 1000:
+            raise AttributeError("Threshold out of range!")
+        super().measure_set(nplc, typ, samples)
 
         self._ser.write(b'*RST\n*CLS\n:INIT:CONT OFF\n:ABORT\n') # Reset everything
         func = ["VOLT:DC", "VOLT:AC", "CURR:DC", "CURR:AC", "RES", "FRES", "PER", "FREQ", "TEMP", "DIOD", "CONT"][typ.value - 1]
         self._ser.write(f':SENS:FUNC "{func}"\n'.encode()) # Set the desired function
-        if typ.value < 7: # Set NPLC for the functions that need it
-            self._ser.write(f':SENS:{func}:NPLC {nplc}\n'.encode())
+        if typ.value < 8: # These settings can't be set for Frequency, Period, Diode, and Continuity measurements
+            self._ser.write(f':SENS:{func}:NPLC {nplc}\n'.encode()) # Set NPLC
+            self._ser.write(f':SENS:{func}:AVER:COUN {samples}\n'.encode()) # Set number of samples the filter will take
+            self._ser.write(f':SENS:{func}:AVER:TCON {"MOV" if mov else "REP"}\n'.encode()) # Set the apropiate type of filter to be used
+            self._ser.write(f':SENS:{func}:AVER:STAT {int(samples > 1)}\n'.encode()) # Turn on averaging filter only if samples > 1
+        if typ.value != 11: # Can't be set for Continuity measurements
+            self._ser.write(f':SENS:{func}:DIG {digits}\n'.encode()) # Set digits
+        else: # Set this only for continuity measurements
+            self._ser.write(f':SENS:{func}:THR {thr}\n'.encode()) # Set continuity threshold
 
     def measure_get(self) -> float:
         """
@@ -117,23 +134,3 @@ class Keithley2000(dmm.DMM):
         """
         self._ser.write(b':READ?\n') # Ask for reading back
         return float(self._ser.readline().decode()) # Return parsed output
-
-    def measure_avg(self, n: int = 2) -> float:
-        # TODO: Make this work with the internal avergaing of the Keithley 2000
-        """
-        Measures raw data, with the settings provided, n times, and averages them.
-
-        For n = 1, preferably use measure_get.
-
-        A measurement will take, at least, n * delay_time seconds.
-
-        :param n: How many samples to take
-        :return: One averaged measurement
-        """
-        self._ser.write(f':SAMP:COUN {n}\n'.encode()) # Set sample count
-        self._ser.write(b':READ?\n') # Query samples
-        s: float = 0
-        for a in self._ser.readline().decode().split(','):
-            s += float(a)
-        self._ser.write(b':SAMP:COUN 1\n') # Return sample count to normal
-        return s / n # Return the average

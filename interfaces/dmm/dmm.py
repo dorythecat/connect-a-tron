@@ -8,9 +8,9 @@ class MType(Enum):
     AC_CURR = 4
     RES     = 5
     FRES    = 6
-    PERIOD  = 7
-    FREQ    = 8
-    TEMP    = 9
+    TEMP    = 7
+    PERIOD  = 8
+    FREQ    = 9
     DIODE   = 10
     CONT    = 11
 
@@ -24,6 +24,7 @@ class DMM:
         self._plf: int = 50
         self._nplc: float = 10
         self._typ: MType = MType.DC_VOLT
+        self._samples = 1
         self._delay_time: float = self.nplc / self.plf
 
         # Connect through serial
@@ -101,13 +102,11 @@ class DMM:
     def key_press(self, value: int) -> None:
         pass
 
-    def measure_set(self, nplc: float, typ: MType) -> None:
+    def measure_set(self, nplc: float, typ: MType, samples: int) -> None:
         self._nplc = nplc
         self._typ = typ
+        self._samples = samples
         self._delay_time = self.nplc / self.plf
 
     def measure_get(self) -> float:
-        pass
-
-    def measure_avg(self, n: int = 2) -> float:
         pass
