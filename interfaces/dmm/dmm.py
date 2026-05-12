@@ -111,11 +111,3 @@ class DMM:
 
     def measure_avg(self, n: int = 2) -> float:
         pass
-
-    def continuous_set(self, nplc: float, typ: MType) -> None:
-        self._nplc = nplc
-        self._typ = typ
-        self._delay_time = self.nplc / self.plf
-
-    def continuous_get(self) -> float:
-        pass

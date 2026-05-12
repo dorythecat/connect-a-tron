@@ -130,42 +130,10 @@ class Keithley2000(dmm.DMM):
         :param n: How many samples to take
         :return: One averaged measurement
         """
-        self._ser.write(b':INIT:CONT ON\n') # Start continuous measurement
-        i: int = 0
-        avg: float = 0
-        while i != n:
-            self._ser.write(b':READ?\n') # Ask for reading back
-            avg += float(self._ser.readline().decode()) # Add the new value to the total
-            i += 1
-        self._ser.write(b':INIT:CONT OFF\n') # Stop continuous measurement
-        return avg / n # Return the average
-
-    def continuous_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT) -> None:
-        """
-        Configures the DMM to take continuous measurements with the settings provided.
-
-        :param nplc: Number of powerline cycles to sample (0.01 to 10)
-        :param type: Type of measurement to make
-        :raises AttributeError: If nplc is out of range
-        """
-        if nplc < 0.01 or nplc > 10:
-            raise AttributeError("NPLC out of range!")
-        super().continuous_set(nplc, typ)
-
-        self._ser.write(b'*RST\n*CLS\n:INIT:CONT OFF\n:ABORT') # Reset everything
-        func = ["VOLT:DC", "VOLT:AC", "CURR:DC", "CURR:AC", "RES", "FRES", "PER", "FREQ", "TEMP", "DIOD", "CONT"][typ.value - 1]
-        self._ser.write(f':SENS:FUNC "{func}"\n'.encode()) # Set the desired function
-        if typ.value < 7: # Set NPLC for the functions that need it
-            self._ser.write(f':SENS:{func}:NPLC {nplc}\n'.encode())
-        self._ser.write(b':INIT:CONT ON\n') # Start continuous data collection
-
-    def continuous_get(self) -> float:
-        """
-        Gets a measurement from continuous mode.
-
-        Remember that a new measurement is only guaranteed after at least 1.5 * delay_time seconds have passed from the previous measurement.
-
-        :return: one measurement
-        """
-        self._ser.write(b':READ?\n')
-        return float(self._ser.readline().decode())
+        self._ser.write(f':SAMP:COUN {n}\n'.encode()) # Set sample count
+        self._ser.write(b':READ?\n') # Query samples
+        s: float = 0
+        for a in self._ser.readline().decode().split(','):
+            s += float(a)
+        self._ser.write(b':SAMP:COUN 1\n') # Return sample count to normal
+        return s / n # Return the average
