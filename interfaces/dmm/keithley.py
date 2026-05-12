@@ -25,12 +25,12 @@ class Keithley2000(dmm.DMM):
     @property
     def id(self) -> str:
         self._ser.write(b'*IDN?\n') # Query the ID
-        return self._ser.readline().decode() # Output the decoded ID
+        return self._ser.readline().decode()[:-3] # Output the decoded ID, with the trailing newline removed
 
     @property
     def beeper(self) -> bool:
         self._ser.write(b':SYST:BEEP:STAT?\n')
-        return bool(self._ser.readline().decode())
+        return bool(int(self._ser.readline().decode()))
 
     @beeper.setter
     def beeper(self, value: bool = True) -> None:
@@ -39,7 +39,7 @@ class Keithley2000(dmm.DMM):
     @property
     def display(self) -> bool:
         self._ser.write(b':DISP:ENAB?\n')
-        return bool(self._ser.readline().decode())
+        return bool(int(self._ser.readline().decode()))
 
     @display.setter
     def display(self, value: bool = True) -> bool:
@@ -48,7 +48,7 @@ class Keithley2000(dmm.DMM):
     @property
     def text(self) -> str:
         self._ser.write(b':DISP:TEXT:DATA?\n')
-        return self._ser.readline().decode()
+        return self._ser.readline().decode()[1:-2] # Remove special characters
 
     @text.setter
     def text(self, value: str = "") -> None:
@@ -65,12 +65,12 @@ class Keithley2000(dmm.DMM):
     @property
     def input(self) -> bool:
         self._ser.write(b':SYST:FRSW?\n')
-        return bool(self._ser.readline().decode())
+        return bool(int(self._ser.readline().decode()))
 
     @property
     def autozero(self) -> bool:
         self._ser.write(b':SYST:AZER:STAT?\n')
-        return bool(self._ser.readline().decode())
+        return bool(int(self._ser.readline().decode()))
 
     @autozero.setter
     def autozero(self, value: bool) -> None:
