@@ -37,12 +37,12 @@ async def interfaces() -> dict:
             ]
     }
 
-@app.get("/dmm/keithley/measure")
+@app.get("/dmm/keithley/measure", tags=["DMM"])
 async def keithley_measure() -> float:
     keithley2000.measure_set()
     return keithley2000.measure_get()
 
-@app.post("/dmm/keithley/text/display")
+@app.post("/dmm/keithley/text/display", tags=["DMM"])
 async def text_display(enable: bool = True, text: str = "") -> None:
     keithley2000.display = enable
     keithley2000.text = text
