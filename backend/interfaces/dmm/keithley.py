@@ -110,7 +110,7 @@ class Keithley2000(dmm.DMM):
         super().measure_set(nplc, typ, samples)
 
         self._ser.write(b'*RST\n*CLS\n') # Reset everything
-        func = ["VOLT:DC", "VOLT:AC", "CURR:DC", "CURR:AC", "RES", "FRES", "PER", "FREQ", "TEMP", "DIOD", "CONT"][typ.value - 1]
+        func = ["VOLT:DC", "VOLT:AC", "CURR:DC", "CURR:AC", "RES", "FRES", "TEMP", "PER", "FREQ", "DIOD", "CONT"][typ.value - 1]
         self._ser.write(f':SENS:FUNC "{func}"\n'.encode()) # Set the desired function
         if typ.value < 7: # These settings can't be set for Temperature (the manual begs to differ, but it gives a -113 "Undefined header" error), Frequency, Period, Diode, and Continuity measurements
             if typ.value not in [2, 4]: # Not applicable to AC measurements, even though the documentation says otherwise, we'll get a -221 "Settings conflict" error
