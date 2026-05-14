@@ -11,13 +11,19 @@
 
 <body>
 
-<div id="page-title">
+<div id="page_title">
   <h1>CONNECT-A-TRON</h1>
 </div>
 
-<h2>Keithley 2000</h1>
-<p id="measure_result">Ready for measurement...</p>
-<button id="measure_button">Measure</button>
+<div id="instruments">
+  <div class="instrument">
+    <div class="name">
+      <h2>Keithley 2000</h1>
+    </div>
+    <p id="measure_result">Ready for measurement...</p>
+    <button id="measure_button">Measure</button>
+  </div>
+</div>
 
 </body>
 

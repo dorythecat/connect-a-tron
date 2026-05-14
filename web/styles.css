@@ -4,18 +4,70 @@
 
 body {
   background-color: #222;
-  color: white;
+  color: #fff;
 }
 
-h1 {
+div#page_title {
+  margin: 100px;
+}
+
+div#page_title h1 {
   display: inline;
   font-size: 64px;
   background: #111;
-  padding: 32px;
+  padding: 32px 64px;
   border-radius: 32px;
   box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.7);
 }
 
-div#page-title {
-  margin: 100px;
+div#instruments {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+div.instrument {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #333;
+  margin: 32px;
+  padding: 32px;
+  border-radius: 32px;
+}
+
+div.instrument div.name {
+  margin: 30px;
+}
+
+div.instrument div.name h2 {
+  display: inline;
+  font-size: 32px;
+  background: #222;
+  padding: 16px 32px;
+  border-radius: 16px;
+  box-shadow: 5px 5px 5px #000;
+}
+
+div.instrument button {
+  color: #fff;
+  background-color: #222;
+  font-size: 20px;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px #000;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+div.instrument button:hover {
+  transform: scale(1.05);
+  box-shadow: 7px 7px 10px #000;
+  background-color: #2a2a2a;
+}
+
+div.instrument button:active {
+  transform: scale(0.95);
+  box-shadow: none;
+  background-color: #111;
 }
