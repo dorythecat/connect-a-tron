@@ -1,0 +1,21 @@
+* {
+  text-align: center;
+}
+
+body {
+  background-color: #222;
+  color: white;
+}
+
+h1 {
+  display: inline;
+  font-size: 64px;
+  background: #111;
+  padding: 32px;
+  border-radius: 32px;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.7);
+}
+
+div#page-title {
+  margin: 100px;
+}
