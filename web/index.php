@@ -39,16 +39,10 @@ document.getElementById("measure_button").onclick = () => {
     return response.json();
   }).then(function(data) {
     data = parseFloat(data);
-    console.log(data);
-    if (data <= 0.1) {
-      data = (data * 1000).toFixed(4);
-      while (String(data).length < 8) data = `0${data}`;
-      result_keithley2000.innerHTML = `${data}mVDC`;
-    } else {
-      data = data.toFixed(5 - Math.floor(Math.log10(data)));
-      while (String(data).length < 8) data = `0${data}`;
-      result_keithley2000.innerHTML = `${data} VDC`;
-    }
+    let microvolt = Math.abs(data) <= 0.1;
+    data = String((data * (microvolt ? 1000 : 1)).toFixed(microvolt ? 4 : 5 - Math.floor(Math.log10(Math.abs(data)))));
+    while (data.length < (8 + data.startsWith('-'))) data = data.startsWith('-') ? `-0${data.slice(1)}` : `0${data}`;
+    result_keithley2000.innerHTML = `${data}${microvolt ? 'm' : ''}VDC`;
   }).catch(function(err) {
     result_keithley2000.innerHTML = "ERROR OCURRED DURING MEASUREMENT"
     console.error(`Fetch Error: ${err}`);
