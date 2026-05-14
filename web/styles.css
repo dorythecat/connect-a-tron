@@ -76,7 +76,7 @@ div.result {
   margin: 20px;
 }
 
-a.digit {
+div.result#result_keithley2000 a {
   font: 'Courier New', monospace;
   color: #0fa;
   font-size: 32px;
