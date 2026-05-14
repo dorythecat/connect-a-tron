@@ -16,23 +16,27 @@
 </div>
 
 <h2>Keithley 2000</h1>
-<?php
-const BASE_URL = 'http://127.0.0.1:8000/dmm/keithley2000';
-  if(isset($_POST['measure'])) {
-    $ch = curl_init();
-    curl_setopt_array($ch, [
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_URL => BASE_URL . "/measure/1" # Measure DC Voltage
-    ]);
-    $measure = curl_exec($ch);
-    curl_close($ch);
-    echo "<p>$measure VDC</p>";
-  }
-?>
-
-<form method="post">
-  <input type="submit" name="measure" value="Measure"/>
-</form>
+<p id="measure_result">Ready for measurement...</p>
+<button id="measure_button">Measure</button>
 
 </body>
+
+<script>
+const measure_url = "http://127.0.0.1:8000/dmm/keithley2000/measure/1";
+
+const measure_result = document.getElementById("measure_result");
+
+document.getElementById("measure_button").onclick = () => {
+  measure_result.innerHTML = "Measuring...";
+  fetch(measure_url).then(function(response) {
+    return response.json();
+  }).then(function(data) {
+    measure_result.innerHTML = `${data} V`;
+  }).catch(function(err) {
+    measure_result.innerHTML = "ERROR OCURRED DURING MEASUREMENT"
+    console.error(`Fetch Error: ${err}`);
+  });
+}
+</script>
+
 </html>
