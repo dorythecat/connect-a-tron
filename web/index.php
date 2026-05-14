@@ -17,18 +17,9 @@
 
 <div id="instruments">
   <div class="instrument" id="keithley2000">
-    <div class="name">
-      <h2>Keithley 2000</h1>
-    </div>
-    <div id="result_keithley2000">
-      <a class="digit">-</a>
-      <a class="digit">-</a>
-      <a class="digit">-</a>
-      <a class="digit">-.</a>
-      <a class="digit">-</a>
-      <a class="digit">-</a>
-      <a class="digit">-</a>
-      <a class="digit">-</a>
+    <div class="name"><h2>Keithley 2000</h1></div>
+    <div class="result" id="result_keithley2000">
+      <a class="digit">-</a><a class="digit">-</a><a class="digit">-</a><a class="digit">-.</a><a class="digit">-</a><a class="digit">-</a><a class="digit">-</a><a class="digit">-</a><a class="digit"></a><a class="digit">V</a><a class="digit">D</a><a class="digit">C</a>
     </div>
     <button id="measure_button">Measure</button>
   </div>
@@ -42,6 +33,7 @@ const measure_url = 'http://127.0.0.1:8000/dmm/keithley2000/measure/1';
 const result_keithley2000 = document.getElementById('result_keithley2000');
 
 document.getElementById('measure_button').onclick = () => {
+  result_keithley2000.innerHTML = '<a class="digit">-</a><a class="digit">-</a><a class="digit">-</a><a class="digit">-.</a><a class="digit">-</a><a class="digit">-</a><a class="digit">-</a><a class="digit">-</a><a class="digit"></a><a class="digit">V</a><a class="digit">D</a><a class="digit">C</a>';
   fetch(measure_url).then(function(response) {
     return response.json();
   }).then(function(data) {
@@ -49,6 +41,7 @@ document.getElementById('measure_button').onclick = () => {
     let microvolt = Math.abs(data) <= 0.1;
     data = String((data * (microvolt ? 1000 : 1)).toFixed(microvolt ? 4 : 5 - Math.floor(Math.log10(Math.abs(data)))));
     while (data.length < (8 + data.startsWith('-'))) data = data.startsWith('-') ? `-0${data.slice(1)}` : `0${data}`;
+    data = data + `${microvolt ? 'm' : ' '}VDC`;
 
     let html = data.startsWith('-') ? '' : '<a class="digit">';
     for (const digit in data) html += data[digit] === '.' ? '.' : `</a><a class="digit">${data[digit]}`;

@@ -3,7 +3,7 @@
 }
 
 body {
-  background-color: #222;
+  background: #222;
   color: #fff;
 }
 
@@ -30,7 +30,7 @@ div.instrument {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  background-color: #333;
+  background: #000;
   margin: 32px;
   padding: 32px;
   border-radius: 32px;
@@ -46,28 +46,40 @@ div.instrument div.name h2 {
   background: #222;
   padding: 16px 32px;
   border-radius: 16px;
-  box-shadow: 5px 5px 5px #000;
+  box-shadow: 5px 5px 5px #111;
 }
 
 div.instrument button {
   color: #fff;
-  background-color: #222;
+  background: #222;
   font-size: 20px;
   border: none;
   padding: 10px;
   border-radius: 10px;
-  box-shadow: 5px 5px 5px #000;
+  box-shadow: 5px 5px 5px #111;
   transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 div.instrument button:hover {
   transform: scale(1.05);
-  box-shadow: 7px 7px 10px #000;
-  background-color: #2a2a2a;
+  box-shadow: 7px 7px 10px #222;
+  background: #2a2a2a;
 }
 
 div.instrument button:active {
   transform: scale(0.95);
   box-shadow: none;
-  background-color: #111;
+  background: #111;
+}
+
+div.result {
+  margin: 20px;
+}
+
+a.digit {
+  font: 'Courier New', monospace;
+  color: #0fa;
+  font-size: 32px;
+  color: #0fa;
+  padding: 10px;
 }
