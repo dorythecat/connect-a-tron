@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Path, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Annotated
 from enum import Enum
@@ -27,6 +28,16 @@ app = FastAPI(
         "name": "GNU Affero General Public License v3.0 or later",
         "identifier": "AGPL-3.0-or-later"
     }
+)
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # TODO: Load instrumets from a configuration file
