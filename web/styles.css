@@ -83,3 +83,21 @@ div.result#result_keithley2000 a {
   color: #0fa;
   padding: 10px;
 }
+
+select.measure_type {
+  background: #222;
+  color: #fff;
+  font-size: 16px;
+  margin: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px #111;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+select.measure_type:hover {
+  transform: scale(1.05);
+  box-shadow: 7px 7px 10px #222;
+  background: #2a2a2a;
+}

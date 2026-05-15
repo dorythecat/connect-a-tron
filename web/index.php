@@ -22,7 +22,7 @@
       <a>-</a><a>-</a><a>-</a><a>-.</a><a>-</a><a>-</a><a>-</a><a></a><a>V</a><a>D</a><a>C</a>
     </div>
     <button id="measure_button_keithley2000">Measure</button>
-    <select id="measure_type_keithley2000">
+    <select class="measure_type" id="measure_type_keithley2000">
       <option value="1" selected>DC Voltage</option>
       <option value="2">AC Voltage</option>
       <option value="3">DC Current</option>
