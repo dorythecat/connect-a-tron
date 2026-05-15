@@ -36,42 +36,6 @@ div.instrument {
   border-radius: 32px;
 }
 
-div.instrument div.name {
-  margin: 30px;
-}
-
-div.instrument div.name h2 {
-  display: inline;
-  font-size: 32px;
-  background: #222;
-  padding: 16px 32px;
-  border-radius: 16px;
-  box-shadow: 5px 5px 5px #111;
-}
-
-div.instrument button {
-  color: #fff;
-  background: #222;
-  font-size: 20px;
-  border: none;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 5px 5px 5px #111;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-}
-
-div.instrument button:hover {
-  transform: scale(1.05);
-  box-shadow: 7px 7px 10px #222;
-  background: #2a2a2a;
-}
-
-div.instrument button:active {
-  transform: scale(0.95);
-  box-shadow: none;
-  background: #111;
-}
-
 div.result {
   margin: 20px;
 }
@@ -84,10 +48,40 @@ div.result#result_keithley2000 a {
   padding: 10px;
 }
 
+div.instrument div.settings {
+  display: inline;
+}
+
+button.measure_button {
+  color: #fff;
+  background: #222;
+  font-size: 20px;
+  height: 50px;
+  margin: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px #111;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+button.measure_button:hover {
+  transform: scale(1.05);
+  box-shadow: 7px 7px 10px #222;
+  background: #2a2a2a;
+}
+
+button.measure_button:active {
+  transform: scale(0.95);
+  box-shadow: none;
+  background: #111;
+}
+
 select.measure_type {
   background: #222;
   color: #fff;
-  font-size: 16px;
+  font-size: 20px;
+  height: 50px;
   margin: 10px;
   padding: 10px;
   border: none;

@@ -21,20 +21,22 @@
     <div class="result" id="result_keithley2000">
       <a>-</a><a>-</a><a>-</a><a>-.</a><a>-</a><a>-</a><a>-</a><a></a><a>V</a><a>D</a><a>C</a>
     </div>
-    <button id="measure_button_keithley2000">Measure</button>
-    <select class="measure_type" id="measure_type_keithley2000">
-      <option value="1" selected>DC Voltage</option>
-      <option value="2">AC Voltage</option>
-      <option value="3">DC Current</option>
-      <option value="4">AC Current</option>
-      <option value="5">Resistance</option>
-      <option value="6">4-Wire Kelvin</option>
-      <option value="7">Temperature</option>
-      <option value="8">Period</option>
-      <option value="9">Frequency</option>
-      <option value="10">Diode</option>
-      <option value="11">Continuity</option>
-    </select>
+    <div class="settings">
+      <button class="measure_button" id="measure_button_keithley2000">Measure</button>
+      <select class="measure_type" id="measure_type_keithley2000">
+        <option value="1" selected>DC Voltage</option>
+        <option value="2">AC Voltage</option>
+        <option value="3">DC Current</option>
+        <option value="4">AC Current</option>
+        <option value="5">Resistance</option>
+        <option value="6">4-Wire Kelvin</option>
+        <option value="7">Temperature</option>
+        <option value="8">Period</option>
+        <option value="9">Frequency</option>
+        <option value="10">Diode</option>
+        <option value="11">Continuity</option>
+      </select>
+    </div>
   </div>
 </div>
 
