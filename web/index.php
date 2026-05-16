@@ -6,18 +6,15 @@
 
   <title>Connect-a-tron</title>
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" title="Default (Dark)"/>
 </head>
 
 <body>
-
-<div id="page_title">
-  <h1>CONNECT-A-TRON</h1>
-</div>
+<div id="page_title"><h1>CONNECT-A-TRON</h1></div>
 
 <div id="instruments">
   <div class="instrument" id="keithley2000">
-    <div class="name"><h2>Keithley 2000</h1></div>
+    <div class="name"><h2>Keithley 2000</h2></div>
     <div class="result" id="result_keithley2000">
       <a>-</a><a>-</a><a>-</a><a>-.</a><a>-</a><a>-</a><a>-</a><a></a><a>V</a><a>D</a><a>C</a>
     </div>
@@ -49,7 +46,6 @@
     </div>
   </div>
 </div>
-
 </body>
 
 <script>
@@ -86,7 +82,7 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
   let thr = measure_threshold_number_keithley2000.value;
   let start_text = `----.---${symbols[mtype]}`;
   let html = '';
-  for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit == 0 ? '' : '</a>'}<a>${start_text[digit]}`;
+  for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit === 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
   fetch(`${murl}${mtype}?nplc=${nplc}&thr=${thr}`).then(function(response) {
     return response.json();
@@ -134,6 +130,5 @@ measure_threshold_slider_keithley2000.addEventListener('input', () => {
 measure_threshold_number_keithley2000.addEventListener('input', () => {
   measure_threshold_slider_keithley2000.value = measure_threshold_number_keithley2000.value;
 });
-
 </script>
 </html>
