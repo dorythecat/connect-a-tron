@@ -50,6 +50,7 @@ div.result#result_keithley2000 a {
 
 div.instrument div.settings {
   display: inline;
+  width: 30vw;
 }
 
 button.measure_button {
@@ -96,7 +97,7 @@ select.measure_type:hover {
   background: #2a2a2a;
 }
 
-div.measure_nplc {
+div.measure_option {
   background: #222;
   color: #fff;
   margin: 20px;
@@ -105,12 +106,12 @@ div.measure_nplc {
   box-shadow: 5px 5px 5px #111;
 }
 
-label.measure_nplc_label {
+label.measure_option_label {
   font-size: 20px;
   margin-right: 10px;
 }
 
-input.measure_nplc_number {
+input.measure_option_number {
   background: #333;
   color: #fff;
   font-size: 20px;
@@ -121,18 +122,18 @@ input.measure_nplc_number {
   box-shadow: 3px 3px 3px #111;
 }
 
-input.measure_nplc_number:focus {
+input.measure_option_number:focus {
   outline: none !important;
 }
 
-input.measure_nplc_slider {
+input.measure_option_slider {
   -webkit-appearance: none;
   margin-left: 10px;
   background: none;
 }
 
-input.measure_nplc_slider::-webkit-slider-runnable-track,
-input.measure_nplc_slider::-moz-range-track {
+input.measure_option_slider::-webkit-slider-runnable-track,
+input.measure_option_slider::-moz-range-track {
   -webkit-appearance: none;
   background: #111;
   height: 10px;
@@ -141,13 +142,13 @@ input.measure_nplc_slider::-moz-range-track {
   transition: background 0.3s ease;
 }
 
-input.measure_nplc_slider:hover::-webkit-slider-runnable-tracl,
-input.measure_nplc_slider:hover::-moz-range-track {
+input.measure_option_slider:hover::-webkit-slider-runnable-tracl,
+input.measure_option_slider:hover::-moz-range-track {
   background: #0a0a0a;
 }
 
-input.measure_nplc_slider::-webkit-slider-thumb,
-input.measure_nplc_slider::-moz-range-thumb {
+input.measure_option_slider::-webkit-slider-thumb,
+input.measure_option_slider::-moz-range-thumb {
   -webkit-appearance: none;
   background: #fff;
   height: 20px;
@@ -157,14 +158,14 @@ input.measure_nplc_slider::-moz-range-thumb {
   transition: transform 0.3s ease, background 0.3s ease;
 }
 
-input.measure_nplc_slider:hover::-webkit-slider-thumb,
-input.measure_nplc_slider:hover::-moz-range-thumb {
+input.measure_option_slider:hover::-webkit-slider-thumb,
+input.measure_option_slider:hover::-moz-range-thumb {
   background: #aaa;
   transform: scale(1.05);
 }
 
-input.measure_nplc_slider:active::-webkit-slider-thumb,
-input.measure_nplc_slider:active::-moz-range-thumb {
+input.measure_option_slider:active::-webkit-slider-thumb,
+input.measure_option_slider:active::-moz-range-thumb {
   background: #777;
   transform: scale(0.95);
 }

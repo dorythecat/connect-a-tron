@@ -36,10 +36,15 @@
         <option value="10">Diode</option>
         <option value="11">Continuity</option>
       </select>
-      <div class="measure_nplc">
-        <label class="measure_nplc_label" for="measure_nplc_number_keithley2000">NPLC</label>
-        <input class="measure_nplc_number" id="measure_nplc_number_keithley2000" name="measure_nplc_number_keithley2000" type="number" min="0.01" max="10" value="10"/>
-        <input class="measure_nplc_slider" id="measure_nplc_slider_keithley2000" type="range" min="0.01" max="10" value="10" step="0.01"/>
+      <div class="measure_option" id="nplc_keithley2000">
+        <label class="measure_option_label" for="measure_nplc_number_keithley2000">NPLC</label>
+        <input class="measure_option_number" id="measure_nplc_number_keithley2000" name="measure_nplc_number_keithley2000" type="number" min="0.01" max="10" value="10"/>
+        <input class="measure_option_slider" id="measure_nplc_slider_keithley2000" type="range" min="0.01" max="10" value="10" step="0.01"/>
+      </div>
+      <div class="measure_option" id="threshold_keithley2000" style="display: none;">
+        <label class="measure_option_label" for="measure_threshold_number_keithley2000">Threshold (Ω)</label>
+        <input class="measure_option_number" id="measure_threshold_number_keithley2000" type="number" min="1" max="1000" value="10"/>
+        <input class="measure_option_slider" id="measure_threshold_slider_keithley2000" type="range" min="1" max="1000" value="10" step="1"/>
       </div>
     </div>
   </div>
@@ -55,6 +60,10 @@ const measure_type_keithley2000 = document.getElementById('measure_type_keithley
 
 const measure_nplc_number_keithley2000 = document.getElementById('measure_nplc_number_keithley2000');
 const measure_nplc_slider_keithley2000 = document.getElementById('measure_nplc_slider_keithley2000');
+
+const div_threshold_keithley2000 = document.getElementById('threshold_keithley2000');
+const measure_threshold_number_keithley2000 = document.getElementById('measure_threshold_number_keithley2000');
+const measure_threshold_slider_keithley2000 = document.getElementById('measure_threshold_slider_keithley2000');
 
 const symbols = [ // Symbols the DMM uses for each measurement type
   "", // Filler so it's 1-indexed
@@ -74,11 +83,12 @@ const symbols = [ // Symbols the DMM uses for each measurement type
 document.getElementById('measure_button_keithley2000').onclick = () => {
   let mtype = parseInt(measure_type_keithley2000.value);
   let nplc = measure_nplc_number_keithley2000.value;
+  let thr = measure_threshold_number_keithley2000.value;
   let start_text = `----.---${symbols[mtype]}`;
   let html = '';
   for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit == 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
-  fetch(`${murl}${mtype}?nplc=${nplc}`).then(function(response) {
+  fetch(`${murl}${mtype}?nplc=${nplc}&thr=${thr}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     data = parseFloat(data);
@@ -103,6 +113,11 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
   }).catch(function(err) { console.error(`Fetch Error: ${err}`); });
 }
 
+measure_type_keithley2000.addEventListener('change', () => {
+  if (measure_type_keithley2000.value === '11') div_threshold_keithley2000.style = 'display: block;';
+  else div_threshold_keithley2000.style = 'display: none;';
+});
+
 // Sync sliders and number displays
 measure_nplc_slider_keithley2000.addEventListener('input', () => {
   measure_nplc_number_keithley2000.value = measure_nplc_slider_keithley2000.value;
@@ -110,6 +125,14 @@ measure_nplc_slider_keithley2000.addEventListener('input', () => {
 
 measure_nplc_number_keithley2000.addEventListener('input', () => {
   measure_nplc_slider_keithley2000.value = measure_nplc_number_keithley2000.value;
+});
+
+measure_threshold_slider_keithley2000.addEventListener('input', () => {
+  measure_threshold_number_keithley2000.value = measure_threshold_slider_keithley2000.value;
+});
+
+measure_threshold_number_keithley2000.addEventListener('input', () => {
+  measure_threshold_slider_keithley2000.value = measure_threshold_number_keithley2000.value;
 });
 
 </script>
