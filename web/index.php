@@ -36,6 +36,11 @@
         <option value="10">Diode</option>
         <option value="11">Continuity</option>
       </select>
+      <div class="measure_nplc">
+        <label class="measure_nplc_label" for="measure_nplc_number_keithley2000">NPLC</label>
+        <input class="measure_nplc_number" id="measure_nplc_number_keithley2000" name="measure_nplc_number_keithley2000" type="number" min="0.01" max="10" value="10"/>
+        <input class="measure_nplc_slider" id="measure_nplc_slider_keithley2000" type="range" min="0.01" max="10" value="10" step="0.01"/>
+      </div>
     </div>
   </div>
 </div>
@@ -47,6 +52,9 @@ const murl = 'http://127.0.0.1:8000/dmm/keithley2000/measure/';
 
 const result_keithley2000 = document.getElementById('result_keithley2000');
 const measure_type_keithley2000 = document.getElementById('measure_type_keithley2000');
+
+const measure_nplc_number_keithley2000 = document.getElementById('measure_nplc_number_keithley2000');
+const measure_nplc_slider_keithley2000 = document.getElementById('measure_nplc_slider_keithley2000');
 
 const symbols = [ // Symbols the DMM uses for each measurement type
   "", // Filler so it's 1-indexed
@@ -65,11 +73,12 @@ const symbols = [ // Symbols the DMM uses for each measurement type
 
 document.getElementById('measure_button_keithley2000').onclick = () => {
   let mtype = parseInt(measure_type_keithley2000.value);
+  let nplc = measure_nplc_number_keithley2000.value;
   let start_text = `----.---${symbols[mtype]}`;
   let html = '';
   for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit == 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
-  fetch(murl + mtype).then(function(response) {
+  fetch(`${murl}${mtype}?nplc=${nplc}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     data = parseFloat(data);
@@ -93,5 +102,15 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
     result_keithley2000.innerHTML = html + '</a>';
   }).catch(function(err) { console.error(`Fetch Error: ${err}`); });
 }
+
+// Sync sliders and number displays
+measure_nplc_slider_keithley2000.addEventListener('input', () => {
+  measure_nplc_number_keithley2000.value = measure_nplc_slider_keithley2000.value;
+});
+
+measure_nplc_number_keithley2000.addEventListener('input', () => {
+  measure_nplc_slider_keithley2000.value = measure_nplc_number_keithley2000.value;
+});
+
 </script>
 </html>

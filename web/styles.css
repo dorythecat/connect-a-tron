@@ -59,10 +59,10 @@ button.measure_button {
   height: 50px;
   margin: 10px;
   padding: 10px;
-  border: none;
+  border: 0;
   border-radius: 10px;
   box-shadow: 5px 5px 5px #111;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 button.measure_button:hover {
@@ -84,14 +84,98 @@ select.measure_type {
   height: 50px;
   margin: 10px;
   padding: 10px;
-  border: none;
+  border: 0;
   border-radius: 10px;
   box-shadow: 5px 5px 5px #111;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 select.measure_type:hover {
   transform: scale(1.05);
   box-shadow: 7px 7px 10px #222;
   background: #2a2a2a;
+}
+
+div.measure_nplc {
+  background: #222;
+  color: #fff;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 5px 5px 5px #111;
+}
+
+label.measure_nplc_label {
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+input.measure_nplc_number {
+  background: #333;
+  color: #fff;
+  font-size: 20px;
+  margin: 0px 10px;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 3px 3px 3px #111;
+}
+
+input.measure_nplc_number:focus {
+  outline: none !important;
+}
+
+input.measure_nplc_slider {
+  -webkit-appearance: none;
+  margin-left: 10px;
+  background: none;
+}
+
+input.measure_nplc_slider::-webkit-slider-runnable-track,
+input.measure_nplc_slider::-moz-range-track {
+  -webkit-appearance: none;
+  background: #111;
+  height: 10px;
+  border-radius: 10px;
+  box-shadow: 3px 3px 3px #111;
+  transition: background 0.3s ease;
+}
+
+input.measure_nplc_slider:hover::-webkit-slider-runnable-tracl,
+input.measure_nplc_slider:hover::-moz-range-track {
+  background: #0a0a0a;
+}
+
+input.measure_nplc_slider::-webkit-slider-thumb,
+input.measure_nplc_slider::-moz-range-thumb {
+  -webkit-appearance: none;
+  background: #fff;
+  height: 20px;
+  width: 20px;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+input.measure_nplc_slider:hover::-webkit-slider-thumb,
+input.measure_nplc_slider:hover::-moz-range-thumb {
+  background: #aaa;
+  transform: scale(1.05);
+}
+
+input.measure_nplc_slider:active::-webkit-slider-thumb,
+input.measure_nplc_slider:active::-moz-range-thumb {
+  background: #777;
+  transform: scale(0.95);
+}
+
+/* Hide spinbox on number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
 }
