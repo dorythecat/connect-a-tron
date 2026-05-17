@@ -38,10 +38,15 @@
         <input class="measure_option_number" id="measure_nplc_number_keithley2000" name="measure_nplc_number_keithley2000" type="number" min="0.01" max="10" value="10"/>
         <input class="measure_option_slider" id="measure_nplc_slider_keithley2000" type="range" min="0.01" max="10" value="10" step="0.01"/>
       </div>
-      <div class="measure_option" id="threshold_keithley2000" style="display: none;">
+      <div class="measure_option" id="threshold_keithley2000" style="display: none">
         <label class="measure_option_label" for="measure_threshold_number_keithley2000">Threshold (Ω)</label>
         <input class="measure_option_number" id="measure_threshold_number_keithley2000" type="number" min="1" max="1000" value="10"/>
         <input class="measure_option_slider" id="measure_threshold_slider_keithley2000" type="range" min="1" max="1000" value="10" step="1"/>
+      </div>
+      <div class="measure_option" id="bandwidth_keithley2000" style="display: none">
+        <label class="measure_option_label" for="measure_bandwidth_number_keithley2000">Bandwidth (Hz)</label>
+        <input class="measure_option_number" id="measure_bandwidth_number_keithley2000" type="number" min="3" max="300000" value="30"/>
+        <input class="measure_option_slider" id="measure_bandwidth_slider_keithley2000" type="range" min="3" max="300000" value="30" step="1"/>
       </div>
     </div>
   </div>
@@ -60,6 +65,10 @@ const measure_nplc_slider_keithley2000 = document.getElementById('measure_nplc_s
 const div_threshold_keithley2000 = document.getElementById('threshold_keithley2000');
 const measure_threshold_number_keithley2000 = document.getElementById('measure_threshold_number_keithley2000');
 const measure_threshold_slider_keithley2000 = document.getElementById('measure_threshold_slider_keithley2000');
+
+const div_bandwidth_keithley2000 = document.getElementById('bandwidth_keithley2000');
+const measure_bandwidth_number_keithley2000 = document.getElementById('measure_bandwidth_number_keithley2000');
+const measure_bandwidth_slider_keithley2000 = document.getElementById('measure_bandwidth_slider_keithley2000');
 
 const symbols = [ // Symbols the DMM uses for each measurement type
   "", // Filler so it's 1-indexed
@@ -110,8 +119,11 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
 }
 
 measure_type_keithley2000.addEventListener('change', () => {
-  if (measure_type_keithley2000.value === '11') div_threshold_keithley2000.style = 'display: block;';
-  else div_threshold_keithley2000.style = 'display: none;';
+  if (measure_type_keithley2000.value === '11') div_threshold_keithley2000.style = 'display: block';
+  else div_threshold_keithley2000.style = 'display: none';
+
+  if (['2', '4'].includes(measure_type_keithley2000.value)) div_bandwidth_keithley2000.style = 'display: block';
+  else div_bandwidth_keithley2000.style = 'display: none';
 });
 
 // Sync sliders and number displays
@@ -129,6 +141,14 @@ measure_threshold_slider_keithley2000.addEventListener('input', () => {
 
 measure_threshold_number_keithley2000.addEventListener('input', () => {
   measure_threshold_slider_keithley2000.value = measure_threshold_number_keithley2000.value;
+});
+
+measure_bandwidth_slider_keithley2000.addEventListener('input', () => {
+  measure_bandwidth_number_keithley2000.value = measure_bandwidth_slider_keithley2000.value;
+});
+
+measure_bandwidth_number_keithley2000.addEventListener('input', () => {
+  measure_bandwidth_slider_keithley2000.value = measure_bandwidth_number_keithley2000.value;
 });
 </script>
 </html>
