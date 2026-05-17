@@ -49,12 +49,12 @@
       </div>
       <div class="measure_option" id="threshold_keithley2000" style="display: none">
         <label class="measure_option_label" for="measure_threshold_number_keithley2000">Threshold (Ω)</label>
-        <input class="measure_option_number" id="measure_threshold_number_keithley2000" type="number" min="1" max="1000" value="10"/>
+        <input class="measure_option_number" id="measure_threshold_number_keithley2000" name="measure_threshold_number_keithley2000" type="number" min="1" max="1000" value="10"/>
         <input class="measure_option_slider" id="measure_threshold_slider_keithley2000" type="range" min="1" max="1000" value="10" step="1"/>
       </div>
       <div class="measure_option" id="bandwidth_keithley2000" style="display: none">
         <label class="measure_option_label" for="measure_bandwidth_number_keithley2000">Bandwidth (Hz)</label>
-        <input class="measure_option_number" id="measure_bandwidth_number_keithley2000" type="number" min="3" max="300000" value="30"/>
+        <input class="measure_option_number" id="measure_bandwidth_number_keithley2000" name="measure_bandwidth_number_keithley2000" type="number" min="3" max="300000" value="30"/>
         <input class="measure_option_slider" id="measure_bandwidth_slider_keithley2000" type="range" min="3" max="300000" value="30" step="1"/>
       </div>
     </div>
@@ -87,7 +87,7 @@ const symbols = [ // Symbols the DMM uses for each measurement type
   "", // Filler so it's 1-indexed
   "VDC",
   "VAC",
-  "ADC", // TODO: Support bandwidth options
+  "ADC",
   "AAC",
   "OHM",
   "OHM",
