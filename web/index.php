@@ -33,6 +33,15 @@
         <option value="10">Diode</option>
         <option value="11">Continuity</option>
       </select>
+      <div class="measure_option" id="filter_keithley2000">
+        <label class="measure_option_label" for="measure_samples_number_keithley2000">Filter Samples</label>
+        <input class="measure_option_number" id="measure_samples_number_keithley2000" name="measure_samples_number_keithley2000" type="number" min="1" max="100" value="1"/>
+        <input class="measure_option_slider" id="measure_samples_slider_keithley2000" type="range" min="1" max="100" value="1" step="1"/>
+        <select class="measure_type" id="measure_filter_type_keithley2000">
+          <option value="0" selected>Repeat Average</option>
+          <option value="1">Moving Average</option>
+        </select>
+      </div>
       <div class="measure_option" id="nplc_keithley2000">
         <label class="measure_option_label" for="measure_nplc_number_keithley2000">NPLC</label>
         <input class="measure_option_number" id="measure_nplc_number_keithley2000" name="measure_nplc_number_keithley2000" type="number" min="0.01" max="10" value="10"/>
@@ -58,6 +67,10 @@ const murl = 'http://127.0.0.1:8000/dmm/keithley2000/measure/';
 
 const result_keithley2000 = document.getElementById('result_keithley2000');
 const measure_type_keithley2000 = document.getElementById('measure_type_keithley2000');
+
+const measure_samples_number_keithley2000 = document.getElementById('measure_samples_number_keithley2000');
+const measure_samples_slider_keithley2000 = document.getElementById('measure_samples_slider_keithley2000');
+const measure_filter_type_keithley2000 = document.getElementById('measure_filter_type_keithley2000');
 
 const measure_nplc_number_keithley2000 = document.getElementById('measure_nplc_number_keithley2000');
 const measure_nplc_slider_keithley2000 = document.getElementById('measure_nplc_slider_keithley2000');
@@ -87,13 +100,15 @@ const symbols = [ // Symbols the DMM uses for each measurement type
 
 document.getElementById('measure_button_keithley2000').onclick = () => {
   let mtype = parseInt(measure_type_keithley2000.value);
+  let fsamples = measure_samples_number_keithley2000.value;
+  let ftype = measure_filter_type_keithley2000.value !== "0";
   let nplc = measure_nplc_number_keithley2000.value;
   let thr = measure_threshold_number_keithley2000.value;
   let start_text = `----.---${symbols[mtype]}`;
   let html = '';
   for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit === 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
-  fetch(`${murl}${mtype}?nplc=${nplc}&thr=${thr}`).then(function(response) {
+  fetch(`${murl}${mtype}?nplc=${nplc}&samples=${fsamples}$mov=${ftype}&thr=${thr}&bandwidth=${bandwidth}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     data = parseFloat(data);
@@ -127,6 +142,14 @@ measure_type_keithley2000.addEventListener('change', () => {
 });
 
 // Sync sliders and number displays
+measure_samples_slider_keithley2000.addEventListener('input', () => {
+  measure_samples_number_keithley2000.value = measure_samples_slider_keithley2000.value;
+});
+
+measure_samples_number_keithley2000.addEventListener('input', () => {
+  measure_samples_slider_keithley2000.value = measure_samples_number_keithley2000.value;
+});
+
 measure_nplc_slider_keithley2000.addEventListener('input', () => {
   measure_nplc_number_keithley2000.value = measure_nplc_slider_keithley2000.value;
 });
