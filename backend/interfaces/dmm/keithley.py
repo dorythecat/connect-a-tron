@@ -87,7 +87,7 @@ class Keithley2000(dmm.DMM):
             raise AttributeError("Invalid key number provided!")
         self._ser.write(f':SYST:KEY {value}\n'.encode())
 
-    def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT, samples: int = 1, mov: bool = False, digits: int = 7, thr: int = 10) -> None:
+    def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT, samples: int = 1, mov: bool = False, digits: int = 7, threshold: int = 10, bandwidth: int = 30) -> None:
         """
         Configures the DMM to use the given settings for all following single measurements.
 
@@ -96,32 +96,38 @@ class Keithley2000(dmm.DMM):
         :param samples: How many raw measurements to average for each queried measurement
         :param filt: Wether to use a moving filter, uses repeat filter if false (See "Filter types" on the Keithley 2000 for more information)
         :param digits: How many digits of precision to display (only affects front panel view, not returned value)
-        :param thr: Threshold for continuity, in Ohms
-        :raises AttributeError: If nplc, samples, digits, or threshold are out of range 
+        :param threshold: Threshold for continuity, in Ohms
+        :param bandwidth: Bandwidth for AC measurements, in Hertz
+        :raises AttributeError: If nplc, samples, digits, threshold, or bandwidth are out of range
         """
-        if nplc < 0.01 or nplc > 10:
+        if not 0.01 <= nplc <= 10:
             raise AttributeError("NPLC out of range!")
-        if samples < 1 or samples > 100:
+        if not 1 <= samples <= 100:
             raise AttributeError("Samples out of range!")
-        if digits < 4 or digits > 7:
+        if not 4 <= digits <= 7:
             raise AttributeError("Digits out of range!")
-        if thr < 1 or thr > 1000:
+        if not 1 <= threshold <= 1000:
             raise AttributeError("Threshold out of range!")
+        if not 3 <= bandwidth <= 300000:
+            raise AttributeError("Bandwidth out of range")
         super().measure_set(nplc, typ, samples)
 
         self._ser.write(b'*RST\n*CLS\n') # Reset everything
         func = ["VOLT:DC", "VOLT:AC", "CURR:DC", "CURR:AC", "RES", "FRES", "TEMP", "PER", "FREQ", "DIOD", "CONT"][typ.value - 1]
         self._ser.write(f':SENS:FUNC "{func}"\n'.encode()) # Set the desired function
         if typ.value < 7: # These settings can't be set for Temperature (the manual begs to differ, but it gives a -113 "Undefined header" error), Frequency, Period, Diode, and Continuity measurements
-            if typ.value not in [2, 4]: # Not applicable to AC measurements, even though the documentation says otherwise, we'll get a -221 "Settings conflict" error
-                self._ser.write(f':SENS:{func}:NPLC {nplc}\n'.encode()) # Set NPLC
+            if typ.value in [2, 4]:
+                self._ser.write(f':SENS:{func}:DET:BAND {bandwidth}\n'.encode())
+            else:
+                self._ser.write(f':SENS:{func}:NPLC {nplc}\n'.encode()) # Set NPLC (Not applicable to AC measurements, even though the documentation says otherwise, we'll get a -221 "Settings conflict" error)
+
             self._ser.write(f':SENS:{func}:AVER:COUN {samples}\n'.encode()) # Set number of samples the filter will take
             self._ser.write(f':SENS:{func}:AVER:TCON {"MOV" if mov else "REP"}\n'.encode()) # Set the apropiate type of filter to be used
             self._ser.write(f':SENS:{func}:AVER:STAT {int(samples > 1)}\n'.encode()) # Turn on averaging filter only if samples > 1
         if typ.value < 10: # Can't be set for Diode and Continuity measurements
             self._ser.write(f':SENS:{func}:DIG {digits}\n'.encode()) # Set digits
         elif typ.value == 11: # Set this only for continuity measurements only
-            self._ser.write(f':SENS:{func}:THR {thr}\n'.encode()) # Set continuity threshold
+            self._ser.write(f':SENS:{func}:THR {threshold}\n'.encode()) # Set continuity threshold
 
     def measure_get(self) -> float:
         """

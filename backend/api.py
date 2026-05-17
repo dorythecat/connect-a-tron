@@ -65,9 +65,10 @@ async def keithley2000_measure(
         samples: Annotated[int, Query(title="Number of samples to average together", ge=1, le=100)] = 1,
         mov: Annotated[bool, Query(title="Wether to use a moving filter (True) or a repeat filter (False)")] = False,
         digits: Annotated[int, Query(title="Number of digits to display", ge=4, le=7)] = 7,
-        thr: Annotated[int, Query(title="Threshold for continuity, in Ohms", ge=1, le=1000)] = 10
+        thr: Annotated[int, Query(title="Threshold for continuity, in Ohms", ge=1, le=1000)] = 10,
+        bandwidth: Annotated[int, Query(title="Bandwidth for AC measurements, in Hertz", ge=3, le=300000)] = 30
     ) -> float:
-    keithley2000.measure_set(nplc, dmm.MType(typ), samples, mov, digits, thr)
+    keithley2000.measure_set(nplc, dmm.MType(typ), samples, mov, digits, thr, bandwidth)
     return keithley2000.measure_get()
 
 @app.get("/dmm/keithley2000/input", tags=["DMM"])
