@@ -222,6 +222,7 @@ measure_samples_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_samples_number_keithley2000.addEventListener('input', () => {
+  measure_samples_number_keithley2000.value = Math.max(1, Math.min(100, measure_samples_number_keithley2000.value));
   measure_samples_slider_keithley2000.value = measure_samples_number_keithley2000.value;
 });
 
@@ -230,6 +231,7 @@ measure_nplc_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_nplc_number_keithley2000.addEventListener('input', () => {
+  measure_nplc_number_keithley2000.value = Math.max(0.01, Math.min(10, measure_nplc_number_keithley2000.value));
   measure_nplc_slider_keithley2000.value = measure_nplc_number_keithley2000.value;
 });
 
@@ -238,6 +240,7 @@ measure_threshold_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_threshold_number_keithley2000.addEventListener('input', () => {
+  measure_threshold_number_keithley2000.value = Math.max(1, Math.min(1000, measure_threshold_number_keithley2000.value));
   measure_threshold_slider_keithley2000.value = measure_threshold_number_keithley2000.value;
 });
 
@@ -246,6 +249,7 @@ measure_bandwidth_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_bandwidth_number_keithley2000.addEventListener('input', () => {
+  measure_bandwidth_number_keithley2000.value = Math.max(3, Math.min(300000, measure_bandwidth_number_keithley2000.value));
   measure_bandwidth_slider_keithley2000.value = measure_bandwidth_number_keithley2000.value;
 });
 
@@ -254,6 +258,7 @@ measure_temp_sim_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_temp_sim_number_keithley2000.addEventListener('input', () => {
+  measure_temp_sim_number_keithley2000.value = Math.max(0, Math.min(50, measure_temp_sim_number_keithley2000.value));
   measure_temp_sim_slider_keithley2000.value = measure_temp_sim_number_keithley2000.value;
 });
 
@@ -262,6 +267,7 @@ measure_temp_coef_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_temp_coef_number_keithley2000.addEventListener('input', () => {
+  measure_temp_coef_number_keithley2000.value = Math.max(-0.0999, Math.min(0.0999, measure_temp_coef_number_keithley2000.value));
   measure_temp_coef_slider_keithley2000.value = measure_temp_coef_number_keithley2000.value;
 });
 
@@ -270,6 +276,7 @@ measure_temp_voff_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_temp_voff_number_keithley2000.addEventListener('input', () => {
+  measure_temp_voff_number_keithley2000.value = Math.max(-0.0999, Math.min(0.0999, measure_temp_voff_number_keithley2000.value));
   measure_temp_voff_slider_keithley2000.value = measure_temp_voff_number_keithley2000.value;
 });
 </script>
