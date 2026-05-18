@@ -34,8 +34,8 @@
         <option value="11">Continuity</option>
       </select>
       <div class="measure_option" id="filter_keithley2000">
-        <label class="measure_option_label" for="measure_samples_number_keithley2000">Filter Samples</label>
-        <input class="measure_option_number" id="measure_samples_number_keithley2000" name="measure_samples_number_keithley2000" type="number" min="1" max="100" value="1"/>
+        <h3 class="measure_option_label">Filter Samples</h3>
+        <input class="measure_option_number" id="measure_samples_number_keithley2000" type="number" min="1" max="100" value="1"/>
         <input class="measure_option_slider" id="measure_samples_slider_keithley2000" type="range" min="1" max="100" value="1" step="1"/>
         <select class="measure_type" id="measure_filter_type_keithley2000">
           <option value="0" selected>Repeat Average</option>
@@ -43,18 +43,18 @@
         </select>
       </div>
       <div class="measure_option" id="nplc_keithley2000">
-        <label class="measure_option_label" for="measure_nplc_number_keithley2000">NPLC</label>
-        <input class="measure_option_number" id="measure_nplc_number_keithley2000" name="measure_nplc_number_keithley2000" type="number" min="0.01" max="10" value="10"/>
+        <h3 class="measure_option_label">NPLC</h3>
+        <input class="measure_option_number" id="measure_nplc_number_keithley2000" type="number" min="0.01" max="10" value="10"/>
         <input class="measure_option_slider" id="measure_nplc_slider_keithley2000" type="range" min="0.01" max="10" value="10" step="0.01"/>
       </div>
       <div class="measure_option" id="threshold_keithley2000" style="display: none">
-        <label class="measure_option_label" for="measure_threshold_number_keithley2000">Threshold (Ω)</label>
-        <input class="measure_option_number" id="measure_threshold_number_keithley2000" name="measure_threshold_number_keithley2000" type="number" min="1" max="1000" value="10"/>
+        <h3 class="measure_option_label">Threshold (Ω)</h3>
+        <input class="measure_option_number" id="measure_threshold_number_keithley2000" type="number" min="1" max="1000" value="10"/>
         <input class="measure_option_slider" id="measure_threshold_slider_keithley2000" type="range" min="1" max="1000" value="10" step="1"/>
       </div>
       <div class="measure_option" id="bandwidth_keithley2000" style="display: none">
-        <label class="measure_option_label" for="measure_bandwidth_number_keithley2000">Bandwidth (Hz)</label>
-        <input class="measure_option_number" id="measure_bandwidth_number_keithley2000" name="measure_bandwidth_number_keithley2000" type="number" min="3" max="300000" value="30"/>
+        <h3 class="measure_option_label">Bandwidth (Hz)</h3>
+        <input class="measure_option_number" id="measure_bandwidth_number_keithley2000" type="number" min="3" max="300000" value="30"/>
         <input class="measure_option_slider" id="measure_bandwidth_slider_keithley2000" type="range" min="3" max="300000" value="30" step="1"/>
       </div>
     </div>

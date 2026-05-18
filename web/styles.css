@@ -106,7 +106,7 @@ div.measure_option {
   box-shadow: 5px 5px 5px #111;
 }
 
-label.measure_option_label {
+h3.measure_option_label {
   font-size: 20px;
   margin-right: 10px;
 }
