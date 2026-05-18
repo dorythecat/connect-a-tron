@@ -58,6 +58,11 @@ async def interfaces() -> dict:
 async def keithley2000_id() -> str:
     return keithley2000.id
 
+class ThermocoupleType(Enum):
+    J = "J"
+    K = "K"
+    T = "T"
+
 @app.get("/dmm/keithley2000/measure/{typ}", tags=["DMM"])
 async def keithley2000_measure(
         typ: Annotated[int, Path(title="Type of measurement to take", ge=1, le=11)],
@@ -66,9 +71,14 @@ async def keithley2000_measure(
         mov: Annotated[bool, Query(title="Wether to use a moving filter (True) or a repeat filter (False)")] = False,
         digits: Annotated[int, Query(title="Number of digits to display", ge=4, le=7)] = 7,
         thr: Annotated[int, Query(title="Threshold for continuity, in Ohms", ge=1, le=1000)] = 10,
-        bandwidth: Annotated[int, Query(title="Bandwidth for AC measurements, in Hertz", ge=3, le=300000)] = 30
+        bandwidth: Annotated[int, Query(title="Bandwidth for AC measurements, in Hertz", ge=3, le=300000)] = 30,
+        ttype: Annotated[ThermocoupleType, Query(title="Type of thermocouple attached to the multimeter")] = ThermocoupleType.J,
+        tref: Annotated[bool, Query(title="Wether to use a simulated (False) or a real (True) thermocouple")] = False,
+        simtemp: Annotated[int, Query(title="Simulated junction temperature, in ºC", ge=0, le=50)] = 23,
+        tcoef: Annotated[float, Query(title="Real junction temperature coefficient", gt=-0.1, lt=0.1)] = 0.0002,
+        voff: Annotated[float, Query(title="Real junction voltage offset", gt=-0.1, lt=0.1)] = 0.05463
     ) -> float:
-    keithley2000.measure_set(nplc, dmm.MType(typ), samples, mov, digits, thr, bandwidth)
+    keithley2000.measure_set(dmm.MType(typ), nplc, samples, mov, digits, thr, bandwidth, ttype.value, tref, simtemp, tcoef, voff)
     return keithley2000.measure_get()
 
 @app.get("/dmm/keithley2000/input", tags=["DMM"])

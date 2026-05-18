@@ -87,18 +87,23 @@ class Keithley2000(dmm.DMM):
             raise AttributeError("Invalid key number provided!")
         self._ser.write(f':SYST:KEY {value}\n'.encode())
 
-    def measure_set(self, nplc: float = 10, typ: dmm.MType = dmm.MType.DC_VOLT, samples: int = 1, mov: bool = False, digits: int = 7, threshold: int = 10, bandwidth: int = 30) -> None:
+    def measure_set(self, typ: dmm.MType = dmm.MType.DC_VOLT, nplc: float = 10, samples: int = 1, mov: bool = False, digits: int = 7, threshold: int = 10, bandwidth: int = 30, ttype: str = "J", tref: bool = False, simtemp: int = 23, tcoef: float = 0.0002, voff: float = 0.05463) -> None:
         """
         Configures the DMM to use the given settings for all following single measurements.
 
-        :param nplc: Number of powerline cycles to sample (0.01 to 10)
         :param typ: Type of measurement to make
+        :param nplc: Number of powerline cycles to sample
         :param samples: How many raw measurements to average for each queried measurement
         :param filt: Wether to use a moving filter, uses repeat filter if false (See "Filter types" on the Keithley 2000 for more information)
         :param digits: How many digits of precision to display (only affects front panel view, not returned value)
         :param threshold: Threshold for continuity, in Ohms
         :param bandwidth: Bandwidth for AC measurements, in Hertz
-        :raises AttributeError: If nplc, samples, digits, threshold, or bandwidth are out of range
+        :param ttype: Type of thermocouple attached to the meter (J, K, or T)
+        :param tref: Reference type for the thermocouple (false for Simulated, true for Real)
+        :param simtemp: Simulated junction temperature, in ºC
+        :param tcoef: Real junction temperature coefficient
+        :param voff: Real junction voltage offset at 0ºC
+        :raises AttributeError: If nplc, samples, digits, threshold, bandwidth, tref, simtemp, tcoef, or voff are out of range, or if ttype is not one of J, K, or T
         """
         if not 0.01 <= nplc <= 10:
             raise AttributeError("NPLC out of range!")
@@ -109,8 +114,16 @@ class Keithley2000(dmm.DMM):
         if not 1 <= threshold <= 1000:
             raise AttributeError("Threshold out of range!")
         if not 3 <= bandwidth <= 300000:
-            raise AttributeError("Bandwidth out of range")
-        super().measure_set(nplc, typ, samples)
+            raise AttributeError("Bandwidth out of range!")
+        if ttype not in ["J", "K", "T"]:
+            raise AttributeError("Invalid junction type!")
+        if not 0 <= simtemp <= 50:
+            raise AttributeError("Invalid simulated junction temperature!")
+        if not -0.1 < tcoef < 0.1:
+            raise AttributeError("Invalid real junction temperature coefficient!")
+        if not -0.1 < voff < 0.1:
+            raise AttributeError("Invalid real junction voltage offset!")
+        super().measure_set(typ, nplc, samples)
 
         self._ser.write(b'*RST\n*CLS\n') # Reset everything
         func = ["VOLT:DC", "VOLT:AC", "CURR:DC", "CURR:AC", "RES", "FRES", "TEMP", "PER", "FREQ", "DIOD", "CONT"][typ.value - 1]
@@ -124,6 +137,14 @@ class Keithley2000(dmm.DMM):
             self._ser.write(f':SENS:{func}:AVER:COUN {samples}\n'.encode()) # Set number of samples the filter will take
             self._ser.write(f':SENS:{func}:AVER:TCON {"MOV" if mov else "REP"}\n'.encode()) # Set the apropiate type of filter to be used
             self._ser.write(f':SENS:{func}:AVER:STAT {int(samples > 1)}\n'.encode()) # Turn on averaging filter only if samples > 1
+        if typ.value == 7: # Temperature settings
+            self._ser.write(f':SENS:{func}:TC:TYPE {ttype}\n'.encode())
+            self._ser.write(f':SENS:{func}:TC:RJUN:RSEL {"REAL" if tref else "SIM"}\n'.encode())
+            if tref:
+                self._ser.write(f':SENS:{func}:TC:RJUN:REAL:TCO {tcoef}\n'.encode())
+                self._ser.write(f':SENS:{func}:TC:RJUN:REAL:OFFSET {voff}\n'.encode())
+            else:
+                self._ser.write(f':SENS:{func}:TC:RJUN:SIM {simtemp}\n'.encode())
         if typ.value < 10: # Can't be set for Diode and Continuity measurements
             self._ser.write(f':SENS:{func}:DIG {digits}\n'.encode()) # Set digits
         elif typ.value == 11: # Set this only for continuity measurements only

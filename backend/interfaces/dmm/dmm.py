@@ -102,7 +102,7 @@ class DMM:
     def key_press(self, value: int) -> None:
         pass
 
-    def measure_set(self, nplc: float, typ: MType, samples: int) -> None:
+    def measure_set(self, typ: MType, nplc: float, samples: int) -> None:
         self._nplc = nplc
         self._typ = typ
         self._samples = samples
