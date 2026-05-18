@@ -100,15 +100,16 @@ const symbols = [ // Symbols the DMM uses for each measurement type
 
 document.getElementById('measure_button_keithley2000').onclick = () => {
   let mtype = parseInt(measure_type_keithley2000.value);
-  let fsamples = measure_samples_number_keithley2000.value;
+  let fsamples = parseInt(measure_samples_number_keithley2000.value);
   let ftype = measure_filter_type_keithley2000.value !== "0";
-  let nplc = measure_nplc_number_keithley2000.value;
-  let thr = measure_threshold_number_keithley2000.value;
+  let nplc = parseFloat(measure_nplc_number_keithley2000.value);
+  let thr = parseFloat(measure_threshold_number_keithley2000.value);
+  let bandwidth = parseInt(measure_bandwidth_number_keithley2000.value);
   let start_text = `----.---${symbols[mtype]}`;
   let html = '';
   for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit === 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
-  fetch(`${murl}${mtype}?nplc=${nplc}&samples=${fsamples}$mov=${ftype}&thr=${thr}&bandwidth=${bandwidth}`).then(function(response) {
+  fetch(`${murl}${mtype}?nplc=${nplc}&samples=${fsamples}&mov=${ftype}&thr=${thr}&bandwidth=${bandwidth}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     data = parseFloat(data);
