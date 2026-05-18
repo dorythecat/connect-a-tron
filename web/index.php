@@ -57,6 +57,33 @@
         <input class="measure_option_number" id="measure_bandwidth_number_keithley2000" type="number" min="3" max="300000" value="30"/>
         <input class="measure_option_slider" id="measure_bandwidth_slider_keithley2000" type="range" min="3" max="300000" value="30" step="1"/>
       </div>
+      <div class="measure_option" id="temp_main_keithley2000" style="display: none">
+        <h3 class="measure_option_label">Thermocouple settings</h3>
+        <select class="measure_type" id="measure_temp_type_keithley2000">
+          <option value="J" selected>J Type</option>
+          <option value="K">K Type</option>
+          <option value="T">T Type</option>
+        </select>
+        <select class="measure_type" id="measure_temp_ref_keithley2000">
+          <option value="0" selected>Simulated junction</option>
+          <option value="1">Real junction</option>
+        </select>
+      </div>
+      <div class="measure_option" id="temp_sim_keithley2000" style="display: none">
+        <h3 class="measure_option_label">Simulated junction temperature</h3>
+        <input class="measure_option_number" id="measure_temp_sim_number_keithley2000" type="number" min="0" max="50" value="23"/>
+        <input class="measure_option_slider" id="measure_temp_sim_slider_keithley2000" type="range" min="0" max="50" value="23" step="1"/>
+      </div>
+      <div class="measure_option" id="temp_real_coef_keithley2000" style="display: none">
+        <h3 class="measure_option_label">Real junction temperature coefficient</h3>
+        <input class="measure_option_number" id="measure_temp_coef_number_keithley2000" type="number" min="-0.0999" max="0.0999" value="0.0002"/>
+        <input class="measure_option_slider" id="measure_temp_coef_slider_keithley2000" type="range" min="-0.0999" max="0.0999" value="0.0002" step="0.0001"/>
+      </div>
+      <div class="measure_option" id="temp_real_voff_keithley2000" style="display:none">
+        <h3 class="measure_option_label">Real junction voltage offset</h3>
+        <input class="measure_option_number" id="measure_temp_voff_number_keithley2000" type="number" min="-0.0999" max="0.0999" value="0.05463"/>
+        <input class="measure_option_slider" id="measure_temp_voff_slider_keithley2000" type="range" min="-0.0999" max="0.0999" value="0.05463" step="0.0001"/>
+      </div>
     </div>
   </div>
 </div>
@@ -83,6 +110,22 @@ const div_bandwidth_keithley2000 = document.getElementById('bandwidth_keithley20
 const measure_bandwidth_number_keithley2000 = document.getElementById('measure_bandwidth_number_keithley2000');
 const measure_bandwidth_slider_keithley2000 = document.getElementById('measure_bandwidth_slider_keithley2000');
 
+const div_temp_main_keithley2000 = document.getElementById('temp_main_keithley2000');
+const measure_temp_type_keithley2000 = document.getElementById('measure_temp_type_keithley2000');
+const measure_temp_ref_keithley2000 = document.getElementById('measure_temp_ref_keithley2000');
+
+const div_temp_sim_keithley2000 = document.getElementById('temp_sim_keithley2000');
+const measure_temp_sim_number_keithley2000 = document.getElementById('measure_temp_sim_number_keithley2000');
+const measure_temp_sim_slider_keithley2000 = document.getElementById('measure_temp_sim_slider_keithley2000');
+
+const div_temp_coef_keithley2000 = document.getElementById('temp_real_coef_keithley2000');
+const measure_temp_coef_number_keithley2000 = document.getElementById('measure_temp_coef_number_keithley2000');
+const measure_temp_coef_slider_keithley2000 = document.getElementById('measure_temp_coef_slider_keithley2000');
+
+const div_temp_voff_keithley2000 = document.getElementById('temp_real_voff_keithley2000');
+const measure_temp_voff_number_keithley2000 = document.getElementById('measure_temp_voff_number_keithley2000');
+const measure_temp_voff_slider_keithley2000 = document.getElementById('measure_temp_voff_slider_keithley2000');
+
 const symbols = [ // Symbols the DMM uses for each measurement type
   "", // Filler so it's 1-indexed
   "VDC",
@@ -101,15 +144,20 @@ const symbols = [ // Symbols the DMM uses for each measurement type
 document.getElementById('measure_button_keithley2000').onclick = () => {
   let mtype = parseInt(measure_type_keithley2000.value);
   let fsamples = parseInt(measure_samples_number_keithley2000.value);
-  let ftype = measure_filter_type_keithley2000.value !== "0";
+  let ftype = measure_filter_type_keithley2000.value !== '0';
   let nplc = parseFloat(measure_nplc_number_keithley2000.value);
   let thr = parseFloat(measure_threshold_number_keithley2000.value);
   let bandwidth = parseInt(measure_bandwidth_number_keithley2000.value);
+  let ttype = measure_temp_type_keithley2000.value;
+  let tref = measure_temp_ref_keithley2000.value !== '0';
+  let simtemp = parseInt(measure_temp_sim_number_keithley2000.value);
+  let tcoef = parseFloat(measure_temp_coef_number_keithley2000.value);
+  let voff = parseFloat(measure_temp_voff_number_keithley2000.value);
   let start_text = `----.---${symbols[mtype]}`;
   let html = '';
   for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit === 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
-  fetch(`${murl}${mtype}?nplc=${nplc}&samples=${fsamples}&mov=${ftype}&thr=${thr}&bandwidth=${bandwidth}`).then(function(response) {
+  fetch(`${murl}${mtype}?nplc=${nplc}&samples=${fsamples}&mov=${ftype}&thr=${thr}&bandwidth=${bandwidth}&ttype=${ttype}&tref=${tref}&simtemp=${simtemp}&tcoef=${tcoef}&voff=${voff}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     data = parseFloat(data);
@@ -134,12 +182,38 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
   }).catch(function(err) { console.error(`Fetch Error: ${err}`); });
 }
 
-measure_type_keithley2000.addEventListener('change', () => {
+// TODO: This function should run on reaload too, so some abstraction would be great too
+measure_type_keithley2000.addEventListener('change', () => { // This thing could probably be optimized a bunch imo
   if (measure_type_keithley2000.value === '11') div_threshold_keithley2000.style = 'display: block';
   else div_threshold_keithley2000.style = 'display: none';
 
   if (['2', '4'].includes(measure_type_keithley2000.value)) div_bandwidth_keithley2000.style = 'display: block';
   else div_bandwidth_keithley2000.style = 'display: none';
+
+  if (measure_type_keithley2000.value === '7') {
+    div_temp_main_keithley2000.style = 'display: block';
+    if (measure_temp_ref_keithley2000.value === '0') {
+      div_temp_sim_keithley2000.style = 'display: block';
+      div_temp_coef_keithley2000.style = 'display: none';
+      div_temp_voff_keithley2000.style = 'display: none';
+    } else {
+      div_temp_sim_keithley2000.style = 'display: none';
+      div_temp_coef_keithley2000.style = 'display: block';
+      div_temp_voff_keithley2000.style = 'display: block';
+    }
+  } else div_temp_main_keithley2000.style = 'display: none';
+});
+
+measure_temp_ref_keithley2000.addEventListener('change', () => {
+  if (measure_temp_ref_keithley2000.value === '0') {
+    div_temp_sim_keithley2000.style = 'display: block';
+    div_temp_coef_keithley2000.style = 'display: none';
+    div_temp_voff_keithley2000.style = 'display: none';
+  } else {
+    div_temp_sim_keithley2000.style = 'display: none';
+    div_temp_coef_keithley2000.style = 'display: block';
+    div_temp_voff_keithley2000.style = 'display: block';
+  } 
 });
 
 // Sync sliders and number displays
@@ -173,6 +247,30 @@ measure_bandwidth_slider_keithley2000.addEventListener('input', () => {
 
 measure_bandwidth_number_keithley2000.addEventListener('input', () => {
   measure_bandwidth_slider_keithley2000.value = measure_bandwidth_number_keithley2000.value;
+});
+
+measure_temp_sim_slider_keithley2000.addEventListener('input', () => {
+  measure_temp_sim_number_keithley2000.value = measure_temp_sim_slider_keithley2000.value;
+});
+
+measure_temp_sim_number_keithley2000.addEventListener('input', () => {
+  measure_temp_sim_slider_keithley2000.value = measure_temp_sim_number_keithley2000.value;
+});
+
+measure_temp_coef_slider_keithley2000.addEventListener('input', () => {
+  measure_temp_coef_number_keithley2000.value = measure_temp_coef_slider_keithley2000.value;
+});
+
+measure_temp_coef_number_keithley2000.addEventListener('input', () => {
+  measure_temp_coef_slider_keithley2000.value = measure_temp_coef_number_keithley2000.value;
+});
+
+measure_temp_voff_slider_keithley2000.addEventListener('input', () => {
+  measure_temp_voff_number_keithley2000.value = measure_temp_voff_slider_keithley2000.value;
+});
+
+measure_temp_voff_number_keithley2000.addEventListener('input', () => {
+  measure_temp_voff_slider_keithley2000.value = measure_temp_voff_number_keithley2000.value;
 });
 </script>
 </html>
