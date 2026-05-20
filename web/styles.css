@@ -180,3 +180,74 @@ input::-webkit-inner-spin-button {
 input[type=number] {
     -moz-appearance: textfield;
 }
+
+div#front_panel_keithley2000 {
+  background: #997;
+  height: 300px;
+  width: 1200px;
+}
+
+div#left_front_panel_keithley2000 {
+  top: 0;
+  left: 0;
+  height: 300px;
+  width: 200px;
+  border: 1px solid #000;
+}
+
+h3.key_label_keithley2000 {
+  color: #000;
+  position: relative;
+  top: 10px;
+  right: 20px;
+  font-size: 20px;
+}
+
+h3#power_key_label_keithley2000 {
+  color: #000;
+  position: relative;
+  right: 20px;
+  bottom: 40px;
+  font-size: 30px;
+}
+
+button.key_keithley2000 {
+  position: relative;
+  top: -40px;
+  left: 60px;
+  height: 40px;
+  width: 40px;
+  border: 2px solid #000;
+  border-radius: 40px;
+}
+
+button#shift_key_keithley2000 {
+  background: #086;
+}
+
+button#local_key_keithley2000 {
+  background: #333;
+}
+
+button#power_key_keithley2000 {
+  background: #997;
+  top: -60px;
+}
+
+button#shift_key_keithley2000:hover {
+  background: #075;
+}
+
+button#local_key_keithley2000:hover {
+  background: #222;
+}
+
+button#shift_key_keithley2000:active {
+  background: #064;
+  transform: scale(0.9);
+}
+
+button#local_key_keithley2000:active {
+  background: #111;
+  transform: scale(0.9);
+}

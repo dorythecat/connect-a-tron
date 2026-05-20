@@ -18,6 +18,13 @@
     <div class="result" id="result_keithley2000">
       <a>-</a><a>-</a><a>-</a><a>-.</a><a>-</a><a>-</a><a>-</a><a></a><a>V</a><a>D</a><a>C</a>
     </div>
+    <div id="front_panel_keithley2000">
+      <div id="left_front_panel_keithley2000">
+        <h3 class="key_label_keithley2000">SHIFT</h3><button class="key_keithley2000" id="shift_key_keithley2000"></button>
+        <h3 class="key_label_keithley2000">LOCAL</h3><button class="key_keithley2000" id="local_key_keithley2000"></button>
+        <h3 id="power_key_label_keithley2000">POWER</h3><button class="key_keithley2000" id="power_key_keithley2000"></button>
+      </div>
+    </div>
     <div class="settings">
       <button class="measure_button" id="measure_button_keithley2000">Measure</button>
       <select class="measure_type" id="measure_type_keithley2000">
