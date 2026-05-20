@@ -83,7 +83,7 @@ class Keithley2000(dmm.DMM):
 
     @key_press.setter
     def key_press(self, value: int) -> None:
-        if value < 1 or value > 31:
+        if value < 1 or value > 32:
             raise AttributeError("Invalid key number provided!")
         self._ser.write(f':SYST:KEY {value}\n'.encode())
 
