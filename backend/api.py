@@ -116,3 +116,11 @@ async def keithley2000_autozero() -> bool:
 @app.post("/dmm/keihtley2000/autozero", tags=["DMM"])
 async def keithley2000_autozero(on: bool = True) -> None:
     keithley2000.autozero = on
+
+@app.get("/dmm/keithley2000/key_press", tags=["DMM"])
+async def keithley2000_key_press() -> int:
+    return keithley2000.key_press
+
+@app.post("/dmm/keithley2000/key_press", tags=["DMM"])
+async def keithley2000_key_press(key: int) -> None:
+    keithley2000.key_press = key
