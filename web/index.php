@@ -20,9 +20,23 @@
     </div>
     <div id="front_panel_keithley2000">
       <div id="left_front_panel_keithley2000">
-        <h3 class="key_label_keithley2000">SHIFT</h3><button class="key_keithley2000" id="shift_key_keithley2000"></button>
+        <h3 class="key_label_keithley2000" id="shift_key_label_keithley2000">SHIFT</h3><button class="key_keithley2000" id="shift_key_keithley2000"></button>
         <h3 class="key_label_keithley2000">LOCAL</h3><button class="key_keithley2000" id="local_key_keithley2000"></button>
         <h3 id="power_key_label_keithley2000">POWER</h3><button class="key_keithley2000" id="power_key_keithley2000"></button>
+      </div>
+      <div id="center_front_panel_keithley2000">
+        <div id="top_row_center_front_panel_keithley2000">
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">MX+B</h3><button class="top_button_keithley2000">DCV</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">%</h3><button class="top_button_keithley2000">ACV</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">dBm</h3><button class="top_button_keithley2000">DCI</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">dB</h3><button class="top_button_keithley2000">ACI</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">CONT</h3><button class="top_button_keithley2000">Ω2</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">DIODE</h3><button class="top_button_keithley2000">Ω4</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">PERIOD</h3><button class="top_button_keithley2000">FREQ</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">TCOUPL</h3><button class="top_button_keithley2000">TEMP</button></div>
+        </div>
+      </div>
+      <div id="right_front_panel_keithley2000">
       </div>
     </div>
     <div class="settings">
