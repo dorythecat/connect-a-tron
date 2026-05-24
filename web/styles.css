@@ -272,15 +272,42 @@ button#local_key_keithley2000:active {
   transform: scale(0.9);
 }
 
-div#top_row_center_front_panel_keithley2000 {
+div.center_front_panel_row_keithley2000 {
   display: flex;
   flex-direction: row;
+}
+
+div#right_front_panel_keithley2000 {
+  display: flex;
+  flex-direction: column;
+}
+
+h3.button_text_keithley2000 {
+  color: #086;
+  font-size: 14px;
+  margin: 5px;
 }
 
 div.top_button_div_keithley2000 {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+div.lower_button_div_left_keithley2000 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  margin: 20px 0 0 20px;
+}
+
+div.lower_button_div_right_keithley2000 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  margin: 20px 20px 0 0;
 }
 
 button.top_button_keithley2000 {
@@ -290,7 +317,7 @@ button.top_button_keithley2000 {
   width: 60px;
   margin: 0 20px;
   border: 1px solid #000;
-  border-radius: 50px;
+  border-radius: 30px;
   font-size: 20px;
 }
 
@@ -303,8 +330,88 @@ button.top_button_keithley2000:active {
   transform: scale(0.9);
 }
 
-h3.top_button_text_keithley2000 {
-  color: #086;
+button.lower_button_left_keithley2000,
+button.lower_button_right_keithley2000 {
+  background: #997;
+  color: #000;
+  height: 40px;
+  width: 80px;
+  margin: 0;
+  border: 2px solid #000;
+  border-radius: 30px 0 0 30px;
+  box-shadow: -2px 0 1px #000;
   font-size: 16px;
-  margin: 5px;
+}
+
+button.lower_button_right_keithley2000 {
+  border-radius: 0 30px 30px 0;
+  box-shadow: 2px 0 1px #000;
+}
+
+button.lower_button_left_keithley2000:hover,
+button.lower_button_right_keithley2000:hover {
+  background: #886;
+}
+
+button.lower_button_left_keithley2000:active,
+button.lower_button_right_keithley2000:active {
+  background: #775;
+  transform: scale(0.9);
+}
+
+span#range_up_front_panel_keithley2000,
+span#range_down_front_panel_keithley2000 {
+  display: block;
+  position: relative;
+  width: 0;
+  background: none;
+  margin: 10px 30px 30px 30px;
+  border-top: none;
+  border-bottom: 80px solid #886;
+  border-right: 60px solid transparent;
+  border-left: 60px solid transparent;
+  filter: drop-shadow(1px 1px);
+}
+
+span#range_down_front_panel_keithley2000 {
+  margin: 30px 30px 10px 30px;
+  border-top: 80px solid #886;
+  border-bottom: none;
+}
+
+span#range_up_front_panel_keithley2000:hover {
+  border-bottom: 80px solid #775;
+}
+
+span#range_down_front_panel_keithley2000:hover {
+  border-top: 80px solid #775;
+}
+
+button:active span#range_up_front_panel_keithley2000 {
+  border-bottom: 80px solid #664;
+  transform: scale(0.9);
+}
+
+button:active span#range_down_front_panel_keithley2000:active {
+  border-top: 80px solid #664;
+  transform: scale(0.9);
+}
+
+button#auto_button_front_panel_keithley2000 {
+  width: 100px;
+  height: 50px;
+  background: #997;
+  border: 2px solid #000;
+  border-radius: 50px;
+  box-shadow: 0 0 2px #000;
+  font-size: 16px;
+}
+
+button#auto_button_front_panel_keithley2000:hover {
+  background: #886;
+}
+
+button#auto_button_front_panel_keithley2000:active {
+  background: #775;
+  transform: scale(0.9);
 }

@@ -25,18 +25,41 @@
         <h3 id="power_key_label_keithley2000">POWER</h3><button class="key_keithley2000" id="power_key_keithley2000"></button>
       </div>
       <div id="center_front_panel_keithley2000">
-        <div id="top_row_center_front_panel_keithley2000">
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">MX+B</h3><button class="top_button_keithley2000">DCV</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">%</h3><button class="top_button_keithley2000">ACV</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">dBm</h3><button class="top_button_keithley2000">DCI</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">dB</h3><button class="top_button_keithley2000">ACI</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">CONT</h3><button class="top_button_keithley2000">Ω2</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">DIODE</h3><button class="top_button_keithley2000">Ω4</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">PERIOD</h3><button class="top_button_keithley2000">FREQ</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="top_button_text_keithley2000">TCOUPL</h3><button class="top_button_keithley2000">TEMP</button></div>
+        <div class="center_front_panel_row_keithley2000">
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">MX+B</h3><button class="top_button_keithley2000">DCV</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">%</h3><button class="top_button_keithley2000">ACV</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">dBm</h3><button class="top_button_keithley2000">DCI</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">dB</h3><button class="top_button_keithley2000">ACI</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">CONT</h3><button class="top_button_keithley2000">Ω2</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">DIODE</h3><button class="top_button_keithley2000">Ω4</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">PERIOD</h3><button class="top_button_keithley2000">FREQ</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">TCOUPL</h3><button class="top_button_keithley2000">TEMP</button></div>
+        </div>
+        <div class="center_front_panel_row_keithley2000">
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">DELAY</h3><button class="lower_button_left_keithley2000">EX TRIG</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">HOLD</h3><button class="lower_button_right_keithley2000">TRIG</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">LIMITS</h3><button class="lower_button_left_keithley2000">STORE</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">ON/OFF</h3><button class="lower_button_right_keithley2000">RECALL</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">TEST</h3><button class="lower_button_left_keithley2000">FILTER</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">CAL</h3><button class="lower_button_right_keithley2000">REL</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_left_keithley2000">⮜</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_right_keithley2000">➤</button></div>
+        </div>
+        <div class="center_front_panel_row_keithley2000">
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">SAVE</h3><button class="lower_button_left_keithley2000">OPEN</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">SETUP</h3><button class="lower_button_right_keithley2000">CLOSE</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">CONFIG</h3><button class="lower_button_left_keithley2000">STEP</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">HALT</h3><button class="lower_button_right_keithley2000">SCAN</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">GPIB</h3><button class="lower_button_left_keithley2000">DIGITS</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">RS232</h3><button class="lower_button_right_keithley2000">RATE</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_left_keithley2000">EXIT</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_right_keithley2000">ENTER</button></div>
         </div>
       </div>
       <div id="right_front_panel_keithley2000">
+        <button style="background: none; border: none"><span id="range_up_front_panel_keithley2000"></span></button>
+        <div style="align-items: center"><button id="auto_button_front_panel_keithley2000">AUTO</button></div>
+        <button style="background: none; border: none"><span id="range_down_front_panel_keithley2000"></span</button>
       </div>
     </div>
     <div class="settings">
