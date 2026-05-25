@@ -359,8 +359,8 @@ button.lower_button_right_keithley2000:active {
   transform: scale(0.9);
 }
 
-span#range_up_front_panel_keithley2000,
-span#range_down_front_panel_keithley2000 {
+span#range_up_button_keithley2000,
+span#range_down_button_keithley2000 {
   display: block;
   position: relative;
   width: 0;
@@ -373,31 +373,31 @@ span#range_down_front_panel_keithley2000 {
   filter: drop-shadow(1px 1px);
 }
 
-span#range_down_front_panel_keithley2000 {
+span#range_down_button_keithley2000 {
   margin: 30px 30px 10px 30px;
   border-top: 80px solid #886;
   border-bottom: none;
 }
 
-span#range_up_front_panel_keithley2000:hover {
+span#range_up_button_keithley2000:hover {
   border-bottom: 80px solid #775;
 }
 
-span#range_down_front_panel_keithley2000:hover {
+span#range_down_button_keithley2000:hover {
   border-top: 80px solid #775;
 }
 
-button:active span#range_up_front_panel_keithley2000 {
+button:active span#range_up_button_keithley2000 {
   border-bottom: 80px solid #664;
   transform: scale(0.9);
 }
 
-button:active span#range_down_front_panel_keithley2000:active {
+button:active span#range_down_button_keithley2000:active {
   border-top: 80px solid #664;
   transform: scale(0.9);
 }
 
-button#auto_button_front_panel_keithley2000 {
+button#auto_button_keithley2000 {
   width: 100px;
   height: 50px;
   background: #997;
@@ -407,11 +407,11 @@ button#auto_button_front_panel_keithley2000 {
   font-size: 16px;
 }
 
-button#auto_button_front_panel_keithley2000:hover {
+button#auto_button_keithley2000:hover {
   background: #886;
 }
 
-button#auto_button_front_panel_keithley2000:active {
+button#auto_button_keithley2000:active {
   background: #775;
   transform: scale(0.9);
 }

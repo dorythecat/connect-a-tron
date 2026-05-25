@@ -26,40 +26,40 @@
       </div>
       <div id="center_front_panel_keithley2000">
         <div class="center_front_panel_row_keithley2000">
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">MX+B</h3><button class="top_button_keithley2000">DCV</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">%</h3><button class="top_button_keithley2000">ACV</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">dBm</h3><button class="top_button_keithley2000">DCI</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">dB</h3><button class="top_button_keithley2000">ACI</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">CONT</h3><button class="top_button_keithley2000">Ω2</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">DIODE</h3><button class="top_button_keithley2000">Ω4</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">PERIOD</h3><button class="top_button_keithley2000">FREQ</button></div>
-          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">TCOUPL</h3><button class="top_button_keithley2000">TEMP</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">MX+B</h3><button class="top_button_keithley2000" id="dcv_button_keithley2000">DCV</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">%</h3><button class="top_button_keithley2000" id="acv_button_keithley2000">ACV</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">dBm</h3><button class="top_button_keithley2000" id="dci_button_keithley2000">DCI</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">dB</h3><button class="top_button_keithley2000" id="aci_button_keithley2000">ACI</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">CONT</h3><button class="top_button_keithley2000" id="r2_button_keithley2000">Ω2</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">DIODE</h3><button class="top_button_keithley2000" id="r4_button_keithley2000">Ω4</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">PERIOD</h3><button class="top_button_keithley2000" id="freq_button_keithley2000">FREQ</button></div>
+          <div class="top_button_div_keithley2000"><h3 class="button_text_keithley2000">TCOUPL</h3><button class="top_button_keithley2000" id="temp_button_keithley2000">TEMP</button></div>
         </div>
         <div class="center_front_panel_row_keithley2000">
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">DELAY</h3><button class="lower_button_left_keithley2000">EX TRIG</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">HOLD</h3><button class="lower_button_right_keithley2000">TRIG</button></div>
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">LIMITS</h3><button class="lower_button_left_keithley2000">STORE</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">ON/OFF</h3><button class="lower_button_right_keithley2000">RECALL</button></div>
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">TEST</h3><button class="lower_button_left_keithley2000">FILTER</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">CAL</h3><button class="lower_button_right_keithley2000">REL</button></div>
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_left_keithley2000">⮜</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_right_keithley2000">➤</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">DELAY</h3><button class="lower_button_left_keithley2000" id="ex_trig_button_keithley2000">EX TRIG</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">HOLD</h3><button class="lower_button_right_keithley2000" id="trig_button_keithley2000">TRIG</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">LIMITS</h3><button class="lower_button_left_keithley2000" id="store_button_keithley2000">STORE</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">ON/OFF</h3><button class="lower_button_right_keithley2000" id="recall_button_keithley2000">RECALL</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">TEST</h3><button class="lower_button_left_keithley2000" id="filter_button_keithley2000">FILTER</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">CAL</h3><button class="lower_button_right_keithley2000" id="rel_button_keithley2000">REL</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_left_keithley2000" id="left_button_keithley2000">⮜</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_right_keithley2000" id="right_button_keithley2000">➤</button></div>
         </div>
         <div class="center_front_panel_row_keithley2000">
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">SAVE</h3><button class="lower_button_left_keithley2000">OPEN</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">SETUP</h3><button class="lower_button_right_keithley2000">CLOSE</button></div>
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">CONFIG</h3><button class="lower_button_left_keithley2000">STEP</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">HALT</h3><button class="lower_button_right_keithley2000">SCAN</button></div>
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">GPIB</h3><button class="lower_button_left_keithley2000">DIGITS</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">RS232</h3><button class="lower_button_right_keithley2000">RATE</button></div>
-          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_left_keithley2000">EXIT</button></div>
-          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_right_keithley2000">ENTER</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">SAVE</h3><button class="lower_button_left_keithley2000" id="open_button_keithley2000">OPEN</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">SETUP</h3><button class="lower_button_right_keithley2000" id="close_button_keithley2000">CLOSE</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">CONFIG</h3><button class="lower_button_left_keithley2000" id="step_button_keithley2000">STEP</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">HALT</h3><button class="lower_button_right_keithley2000" id="scan_button_keithley2000">SCAN</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000">GPIB</h3><button class="lower_button_left_keithley2000" id="digits_button_keithley2000">DIGITS</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000">RS232</h3><button class="lower_button_right_keithley2000" id="rate_button_keithley2000">RATE</button></div>
+          <div class="lower_button_div_left_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_left_keithley2000" id="exit_button_keithley2000">EXIT</button></div>
+          <div class="lower_button_div_right_keithley2000"><h3 class="button_text_keithley2000" style="user-select: none; color: #997">FILLER</h3><button class="lower_button_right_keithley2000" id="enter_button_keithley2000">ENTER</button></div>
         </div>
       </div>
       <div id="right_front_panel_keithley2000">
-        <button style="background: none; border: none"><span id="range_up_front_panel_keithley2000"></span></button>
-        <div style="align-items: center"><button id="auto_button_front_panel_keithley2000">AUTO</button></div>
-        <button style="background: none; border: none"><span id="range_down_front_panel_keithley2000"></span</button>
+        <button style="background: none; border: none"><span id="range_up_button_keithley2000"></span></button>
+        <div style="align-items: center"><button id="auto_button_keithley2000">AUTO</button></div>
+        <button style="background: none; border: none"><span id="range_down_button_keithley2000"></span</button>
       </div>
     </div>
     <div class="settings">
@@ -134,7 +134,8 @@
 </body>
 
 <script>
-const murl = 'http://127.0.0.1:8000/dmm/keithley2000/measure/';
+const murl = 'http://127.0.0.1:8000/dmm/keithley2000/measure/'; // Measurement URL
+const burl = 'http://127.0.0.1:8000/dmm/keithley2000/key_press'// Button URL
 
 const result_keithley2000 = document.getElementById('result_keithley2000');
 const measure_type_keithley2000 = document.getElementById('measure_type_keithley2000');
@@ -223,7 +224,7 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
     let html = '';
     for (const digit in data) html += data[digit] === '.' ? '.' : `${digit ? '</a>' : ''}<a>${data[digit]}`;
     result_keithley2000.innerHTML = html + '</a>';
-  }).catch(function(err) { console.error(`Fetch Error: ${err}`); });
+  }).catch(function(err) { console.error(`Fetch error: ${err}`); });
 }
 
 // TODO: This function should run on reaload too, so some abstraction would be great too
@@ -323,5 +324,122 @@ measure_temp_voff_number_keithley2000.addEventListener('input', () => {
   measure_temp_voff_number_keithley2000.value = Math.max(-0.0999, Math.min(0.0999, measure_temp_voff_number_keithley2000.value));
   measure_temp_voff_slider_keithley2000.value = measure_temp_voff_number_keithley2000.value;
 });
+
+// Front panel buttons
+document.getElementById("shift_key_keithley2000").onclick = () => {
+  fetch(`${burl}?key=1`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("dcv_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=2`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("acv_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=3`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("dci_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=4`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("aci_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=5`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("r2_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=6`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("r4_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=7`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("freq_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=8`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("temp_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=16`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("range_up_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=11`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("local_key_keithley2000").onclick = () => {
+  fetch(`${burl}?key=17`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("ex_trig_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=18`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("trig_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=19`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("store_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=20`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("recall_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=21`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("filter_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=22`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("rel_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=23`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("left_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=24`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("right_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=15`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("auto_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=12`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("open_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=26`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("close_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=27`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("step_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=28`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("scan_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=29`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("digits_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=30`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("rate_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=31`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("exit_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=32`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("enter_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=14`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+document.getElementById("range_down_button_keithley2000").onclick = () => {
+  fetch(`${burl}?key=13`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
 </script>
 </html>
