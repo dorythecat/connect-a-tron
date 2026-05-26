@@ -23,7 +23,7 @@ class Oscilloscope:
     def ppk(self, channel: int = 1) -> float:
         return 0
 
-    def get_waveform(self, points: int) -> list[float]:
+    def get_waveform(self, points: int, mode: str, samples: int) -> list[float]:
         pass
 
     def set_waveform(self, freq: float, amp: float, offset: float, typ: str, duty: int) -> None:

@@ -12,7 +12,7 @@ print(f"PPK: {osc.ppk()} V")
 #plt.plot(ch1, 'b')
 #plt.show()
 
-freq = range(1000000, 20000000, 1000000)
+freq = range(1000000, 20000000, 100000)
 resp = []
 for i in freq:
     osc.set_waveform(freq=i, amp=5)
