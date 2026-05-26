@@ -1,5 +1,8 @@
-fd = open("/dev/usbtmc0", "r+b", buffering=0)
+import matplotlib.pyplot as plt
 
-fd.write(b'*IDN?\n')
+import backend.interfaces.oscilloscope.hantek as hantek
 
-print(fd.read(1024))
+osc = hantek.DSO2D15()
+
+plt.plot(osc.get_waveform())
+plt.show()
