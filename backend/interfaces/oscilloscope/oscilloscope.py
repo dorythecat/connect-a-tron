@@ -31,7 +31,10 @@ class Oscilloscope:
     def ppk(self, channel: int) -> float:
         return 0
 
-    def channel_conf(self, channel: int, on: bool, scale: float, offset: float, probe: int, invert: bool, coupling: str, bw_limit: bool) -> None:
+    def time_conf(self, scale: float, offset: float) -> None:
+        pass
+
+    def channel_conf(self, channel: int, on: bool, scale: float, offset: float, probe: int, invert: bool, coupling: str) -> None:
         pass
 
     def get_waveform(self, points: int, mode: str, samples: int) -> list[float]:

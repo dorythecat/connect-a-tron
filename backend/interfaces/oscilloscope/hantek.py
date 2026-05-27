@@ -76,13 +76,46 @@ class DSO2D15(oscilloscope.Oscilloscope):
         self._conn.write(f':MEAS:CHAN{channel}:ITEM? VPP\n'.encode())
         return float(self._conn.read(32))
 
+    def time_conf(self, scale: float = 0.0005, offset: float = 0, mode: str = "MAIN", window: bool = False, window_scale: float = 0.0001, window_offset: float = 0) -> None:
+        """
+        Configures the time domain and all of its associated settings.
+
+        :param scale: The time scale of the oscilloscope, in seconds per division. (0.000000002 <= scale <= 100) (MUST bstart by 1, 2, or 5 (ie, 10ns, 50ms, but NOT 30ms, etc))
+        :param offset: The offset of the oscilloscope from the trigger point, in seconds.
+        :param mode: The display mode of the oscilloscope. ("MAIN", "XY", or "ROLL")
+        :param window: Wether to enable or not the secondary window.
+        :param window_scale: The time scale of the secondary window, in seconds per division. See the scale parameter for more info.
+        :param window_offset: The offset of the secondary window from the trigger, in seconds.
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if scale not in [0.000000002, 0.000000005, 0.00000001, 0.00000002, 0.00000005, 0.0000001, 0.0000002, 0.0000005, 0.000001, 0.000002, 0.000005, 0.00001, 0.00002, 0.00005, 0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100]:
+            raise AttributeError("Invalid scale value provided!")
+        if window_scale not in [0.000000002, 0.000000005, 0.00000001, 0.00000002, 0.00000005, 0.0000001, 0.0000002, 0.0000005, 0.000001, 0.000002, 0.000005, 0.00001, 0.00002, 0.00005, 0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100]:
+            raise AttributeError("Invalid secondary window scale value provided!")
+        if mode not in ["MAIN", "XY", "ROLL"]:
+            raise AttributeError("Invalid mode value provided!")
+
+        self._conn.write(f':TIM:SCAL {scale}\n'.encode()) # Set scale value
+        self._conn.write(f':TIM:POS {offset}\n'.encode()) # Set offset value
+        self._conn.write(f':TIM:MODE {mode}\n'.encode()) # Set mode value
+
+        if not window:
+            self._conn.write(b':TIM:WIND:ENAB 0\n') # Disable secondary window
+            return
+
+        self._conn.write(b':TIM:WIND:ENAB 1\n') # Enable secondary window
+        self._conn.write(f':TIM:WIND:SCAL {window_scale}\n'.encode()) # Set secondary window scale value
+        self._conn.write(f':TIM:WIND:POS {window_offset}\n'.encode()) # Set secondary window offset value
+
     def channel_conf(self, channel: int = 1, on: bool = True, scale: float = 1, offset: float = 0, probe: int = 1, invert: bool = False, coupling: str = "DC", bw_limit: bool = False) -> None:
         """
         Configures a given channel and all of its associated settings.
 
         :param channel: The channel to configure. (1 or 2)
         :param on: Wether the channel should be on or off.
-        :param scale: The vertical scale of the channel, in Volts. (0.001 * probe <= scale <= 10 * probe)
+        :param scale: The vertical scale of the channel, in Volts per division. (0.001 * probe <= scale <= 10 * probe)
         :param offset: The vertical offset of the channel, in Volts. (-50 * probe <= offset <= 50 * probe)
         :param probe: The attenuation factor of the connected probe (1, 10, 50, or 100)
         :param invert: Wether to invert the channel or not.
