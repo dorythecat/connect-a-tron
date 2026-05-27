@@ -44,7 +44,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid channel provided!")
 
         self._conn.write(f':MEAS:CHAN{channel}:ITEM? PERIOD\n'.encode())
-        return float(self._conn.read(32))
+        return float(self._conn.read(32).decode())
 
     def rms(self, channel: int = 1) -> float:
         """
@@ -59,7 +59,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid channel provided!")
 
         self._conn.write(f':MEAS:CHAN{channel}:ITEM? RMS\n'.encode())
-        return float(self._conn.read(32))
+        return float(self._conn.read(32).decode())
 
     def ppk(self, channel: int = 1) -> float:
         """
@@ -74,7 +74,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid channel provided!")
 
         self._conn.write(f':MEAS:CHAN{channel}:ITEM? VPP\n'.encode())
-        return float(self._conn.read(32))
+        return float(self._conn.read(32).decode())
 
     def time_conf(self, scale: float = 0.0005, offset: float = 0, mode: str = "MAIN", window: bool = False, window_scale: float = 0.0001, window_offset: float = 0) -> None:
         """
@@ -176,16 +176,16 @@ class DSO2D15(oscilloscope.Oscilloscope):
         self._conn.write(f':ACQ:COUN {samples}\n'.encode()) # Set the number of samples to average in AVER mode
 
         self._conn.write(b':WAV:DATA:ALL?\n') # Query header
-        data = self._conn.read(128)
+        data: str = self._conn.read(128).decode()
         if data[:2] != b'#9':
             raise RuntimeError("Response header is corrupted or invalid!")
         offset = float(data[31:35])
         voltage = float(data[47:53])
         counter = points
-        out = []
+        out: list[float] = []
         while counter > 0:
             self._conn.write(b':WAV:DATA:ALL?\n') # Query actual data
-            data = self._conn.read(4096)
+            data: str = self._conn.read(4096).decode()
             if data[:2] != b'#9':
                 raise RuntimeError("Response header is corrupted or invalid!")
             for i in range(29, len(data)):
