@@ -111,7 +111,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             counter -= 4096
         return out
 
-    def set_waveform(self, freq: float = 1000, amp: float = 1, offset: float = 0, typ: str = "SINE", duty: int = 50) -> None:
+    def set_waveform(self, freq: float = 1000, amp: float = 1, offset: float = 0, typ: str = "SINE", duty: int = 50, mod: str = "NONE", mod_typ: str = "SINE", mod_freq: int = 1000, mod_depth: int = 100) -> None:
         """
         Sets the waveform for the arbitrary waveform generator to produce.
 
@@ -120,6 +120,10 @@ class DSO2D15(oscilloscope.Oscilloscope):
         :param offset: Offset of the desired wave, in volts. (-3 <= offset <= 3)
         :param typ: Type of the desired wave. ("SINE", "SQUA", "RAMP", "EXP", "NOIS", "DC", "ARB1", "ARB2", "ARB3", "ARB4")
         :param duty: Duty cycle of the desired wave, in percentage (0 <= duty <= 100)
+        :param mod: The type of modulation to apply to the signal ("NONE", "AM", or "FM")
+        :param mod_typ: The type of signal to modulate with ("SINE", "SQUA", or "RAMP")
+        :param mod_freq: The frequency to modulate with, in hertz (100 <= mod_freq <= 50000)
+        :param mod_depth: In AM modulation, this value is the modulation depth (0 <= mod_depth <= 100), while in FM modulation, this value is the modulation deviation (100 <= mod_depth <= 10000)
 
         :returns: Nothing.
         :raises AttributeError: If any of the provided values is invalid.
@@ -134,6 +138,14 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid type value provided!")
         if not 0 <= duty <= 100:
             raise AttributeError("Invalid duty cycle value provided!")
+        if mod not in ["NONE", "AM", "FM"]:
+            raise AttributeError("Invalid modulation value provided!")
+        if mod_typ not in ["SINE", "SQUA", "RAMP"]:
+            raise AttributeError("Invalid modulation type value provided!")
+        if not 100 <= mod_freq <= 50000:
+            raise AttributeError("Invalid modulation frequency value provided!")
+        if (mod == "AM" and not 0 <= mod_depth <= 100) or (mod == "FM" and not 100 <= mod_depth <= 10000):
+            raise AttributeError("Invalid modulation depth value provided!")
 
         if freq == 0 or amp == 0:
             self._conn.write(b':DDS:SWIT 0\n') # Turn off signal generator
@@ -145,3 +157,13 @@ class DSO2D15(oscilloscope.Oscilloscope):
         self._conn.write(f':DDS:AMP {amp}\n'.encode()) # Set signal amplitude
         self._conn.write(f':DDS:OFFS {offset}\n'.encode()) # Set signal offset
         self._conn.write(f':DDS:DUTY {duty}\n'.encode())
+
+        if mod == "NONE":
+            self._conn.write(b':DDS:WAVE:MODE 0\n') # Turn modulation off
+            return
+
+        self._conn.write(b':DDS:WAVE:MODE 1\n') # Turn modulation on
+        self._conn.write(f':DDS:MODE:TYPE {mod}\n'.encode()) # Set modulation type
+        self._conn.write(f':DDS:MODE:WAVE:TYPE {mod_typ}\n'.encode()) # Set modulation wave type
+        self._conn.write(f':DDS:MODE:FREQ {mod_freq}\n'.encode()) # Set modulation frequency
+        self._conn.write(f':DDS:MODE:DEPT {mod_depth}\n'.encode()) # Set modualtion depth/deviation
