@@ -19,17 +19,20 @@ class Oscilloscope:
     def keypad_lock(self, value: bool) -> None:
         pass
 
-    def frequency(self, channel: int = 1) -> float:
+    def frequency(self, channel: int) -> float:
         return 0
 
-    def period(self, channel: int = 1) -> float:
+    def period(self, channel: int) -> float:
         return 0
 
-    def rms(self, channel: int = 1) -> float:
+    def rms(self, channel: int) -> float:
         return 0
 
-    def ppk(self, channel: int = 1) -> float:
+    def ppk(self, channel: int) -> float:
         return 0
+
+    def channel_conf(self, channel: int, on: bool, scale: float, offset: float, probe: int, invert: bool, coupling: str, bw_limit: bool) -> None:
+        pass
 
     def get_waveform(self, points: int, mode: str, samples: int) -> list[float]:
         pass

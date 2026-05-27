@@ -76,6 +76,48 @@ class DSO2D15(oscilloscope.Oscilloscope):
         self._conn.write(f':MEAS:CHAN{channel}:ITEM? VPP\n'.encode())
         return float(self._conn.read(32))
 
+    def channel_conf(self, channel: int = 1, on: bool = True, scale: float = 1, offset: float = 0, probe: int = 1, invert: bool = False, coupling: str = "DC", bw_limit: bool = False) -> None:
+        """
+        Configures a given channel and all of its associated settings.
+
+        :param channel: The channel to configure. (1 or 2)
+        :param on: Wether the channel should be on or off.
+        :param scale: The vertical scale of the channel, in Volts. (0.001 * probe <= scale <= 10 * probe)
+        :param offset: The vertical offset of the channel, in Volts. (-50 * probe <= offset <= 50 * probe)
+        :param probe: The attenuation factor of the connected probe (1, 10, 50, or 100)
+        :param invert: Wether to invert the channel or not.
+        :param coupling: Coupling mode of the channel. ("AC", "DC", or "GND")
+        :param bw_limit: Wether to activate the 20MHz bandwidth filter for this channel, to filter out high frequency noise.
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values is invalid.
+        """
+        if channel not in [1, 2]:
+            raise AttributeError("Invalid channel provided!")
+        if probe not in [1, 10, 50, 100]:
+            raise AttributeError("Invalid probe value provided!")
+        if not 0.001 <= (scale / probe) <= 10:
+            raise AttributeError("Invalid scale value provided!")
+        if not -50 <= (offset / probe) <= 50:
+            raise AttributeError("Invalid offset value provided!")
+        if coupling not in ["AC", "DC", "GND"]:
+            raise AttributeError("Invalid coupling value provided!")
+
+        if not on:
+            self._conn.write(f':CHAN{channel}:DISP 0\n'.encode()) # Turn the channel off
+            return
+
+        self._conn.write(f':CHAN{channel}:DISP 1\n'.encode()) # Turn the channel on
+        self._conn.write(f':CHAN{channel}:PROB {probe}\n'.encode()) # Set probe value
+        # If the scale is not a usually selectable one, activate vernier mode
+        vernier = (scale / probe) not in [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10]
+        self._conn.write(f':CHAN{channel}:VERN {int(vernier)}\n'.encode())
+        self._conn.write(f':CHAN{channel}:SCAL {scale}V\n'.encode()) # Set scale value
+        self._conn.write(f':CHAN{channel}:OFFS {offset}V\n'.encode()) # Set offset value
+        self._conn.write(f':CHAN{channel}:COUP {coupling}\n'.encode()) # Set coupling value
+        self._conn.write(f':CHAN{channel}:BWL {'1' if bw_limit else '0'}\n'.encode()) # Set bandwidth limit value
+        self._conn.write(f':CHAN{channel}:INV {'1' if invert else '0'}\n'.encode()) # Set invert value
+
     def get_waveform(self, points: int = 4000, mode: str = "HRES", samples: int = 4) -> list[float]:
         """
         Measures the waveform data from the oscilloscope, ensuring the format is correct and automactically handling all header data and integrity checks.
