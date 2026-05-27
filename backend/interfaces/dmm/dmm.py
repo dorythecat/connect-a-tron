@@ -60,47 +60,47 @@ class DMM:
 
     @property
     def beeper(self) -> bool:
-        return True
+        return True # Default value, since most DMMs will beep
 
     @beeper.setter
     def beeper(self, value: bool) -> None:
-        pass
+        raise NotImplementedError
 
     @property
     def display(self) -> bool:
-        return True
+        return True # Default value, since most DMMs will display
 
     @display.setter
     def display(self, value: bool) -> None:
-        pass
+        raise NotImplementedError
 
     @property
     def text(self) -> str:
-        return ""
+        return "" # Default value, since most DMMs don't have any text displayed by default
 
     @text.setter
     def text(self, value: str) -> None:
-        pass
+        raise NotImplementedError
 
     @property
     def input(self) -> bool: # True means front, False means back
-        return True
+        return True # Default value, since most DMMs get their input from the front
 
     @property
     def autozero(self) -> bool:
-        return True
+        return True # Default value, since most DMMs autozero
 
     @autozero.setter
     def autozero(self, value: bool) -> None:
-        pass
+        raise NotImplementedError
 
     @property
     def key_press(self) -> int:
-        return -1
+        return -1 # Default value, no key pressed last
 
     @key_press.setter
     def key_press(self, value: int) -> None:
-        pass
+        raise NotImplementedError
 
     def measure_set(self, typ: MType, nplc: float, samples: int) -> None:
         self._nplc = nplc
@@ -109,4 +109,4 @@ class DMM:
         self._delay_time = self.nplc / self.plf
 
     def measure_get(self) -> float:
-        pass
+        raise NotImplementedError
