@@ -7,6 +7,15 @@ class DSO2D15(oscilloscope.Oscilloscope):
     def __del__(self) -> None:
         super().__del__()
 
+    @property
+    def keypad_lock(self) -> bool:
+        self._conn.write(b':SYST:LOCK?\n')
+        return self._conn.read(128).decode() == "ON"
+
+    @keypad_lock.setter
+    def keypad_lock(self, value: bool) -> None:
+        self._conn.write(f':SYST:LOCK {int(value)}\n'.encode())
+
     def frequency(self, channel: int = 1) -> float:
         """
         Get the frequency of the waveform currently being read by the oscilloscope on the specified channel.

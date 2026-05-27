@@ -11,6 +11,14 @@ class Oscilloscope:
     def port(self) -> str:
         return self._port
 
+    @property
+    def keypad_lock(self) -> bool:
+        return True
+
+    @keypad_lock.setter
+    def keypad_lock(self, value: bool) -> None:
+        pass
+
     def frequency(self, channel: int = 1) -> float:
         return 0
 
