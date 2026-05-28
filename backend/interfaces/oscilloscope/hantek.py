@@ -97,17 +97,17 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if mode not in ["MAIN", "XY", "ROLL"]:
             raise AttributeError("Invalid mode value provided!")
 
-        self._conn.write(f':TIM:SCAL {scale}\n'.encode()) # Set scale value
-        self._conn.write(f':TIM:POS {offset}\n'.encode()) # Set offset value
-        self._conn.write(f':TIM:MODE {mode}\n'.encode()) # Set mode value
+        self._conn.write(f':TIM:SCAL {scale}\n'.encode())
+        self._conn.write(f':TIM:POS {offset}\n'.encode())
+        self._conn.write(f':TIM:MODE {mode}\n'.encode())
 
         if not window:
-            self._conn.write(b':TIM:WIND:ENAB 0\n') # Disable secondary window
+            self._conn.write(b':TIM:WIND:ENAB 0\n')
             return
 
-        self._conn.write(b':TIM:WIND:ENAB 1\n') # Enable secondary window
-        self._conn.write(f':TIM:WIND:SCAL {window_scale}\n'.encode()) # Set secondary window scale value
-        self._conn.write(f':TIM:WIND:POS {window_offset}\n'.encode()) # Set secondary window offset value
+        self._conn.write(b':TIM:WIND:ENAB 1\n')
+        self._conn.write(f':TIM:WIND:SCAL {window_scale}\n'.encode())
+        self._conn.write(f':TIM:WIND:POS {window_offset}\n'.encode())
 
     def channel_conf(self, channel: int = 1, on: bool = True, scale: float = 1, offset: float = 0, probe: int = 1, invert: bool = False, coupling: str = "DC", bw_limit: bool = False) -> None:
         """
@@ -137,19 +137,19 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid coupling value provided!")
 
         if not on:
-            self._conn.write(f':CHAN{channel}:DISP 0\n'.encode()) # Turn the channel off
+            self._conn.write(f':CHAN{channel}:DISP 0\n'.encode())
             return
 
-        self._conn.write(f':CHAN{channel}:DISP 1\n'.encode()) # Turn the channel on
-        self._conn.write(f':CHAN{channel}:PROB {probe}\n'.encode()) # Set probe value
+        self._conn.write(f':CHAN{channel}:DISP 1\n'.encode())
+        self._conn.write(f':CHAN{channel}:PROB {probe}\n'.encode())
         # If the scale is not a usually selectable one, activate vernier mode
         vernier = (scale / probe) not in [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10]
         self._conn.write(f':CHAN{channel}:VERN {int(vernier)}\n'.encode())
-        self._conn.write(f':CHAN{channel}:SCAL {scale}V\n'.encode()) # Set scale value
-        self._conn.write(f':CHAN{channel}:OFFS {offset}V\n'.encode()) # Set offset value
-        self._conn.write(f':CHAN{channel}:COUP {coupling}\n'.encode()) # Set coupling value
-        self._conn.write(f':CHAN{channel}:BWL {'1' if bw_limit else '0'}\n'.encode()) # Set bandwidth limit value
-        self._conn.write(f':CHAN{channel}:INV {'1' if invert else '0'}\n'.encode()) # Set invert value
+        self._conn.write(f':CHAN{channel}:SCAL {scale}V\n'.encode())
+        self._conn.write(f':CHAN{channel}:OFFS {offset}V\n'.encode())
+        self._conn.write(f':CHAN{channel}:COUP {coupling}\n'.encode())
+        self._conn.write(f':CHAN{channel}:BWL {'1' if bw_limit else '0'}\n'.encode())
+        self._conn.write(f':CHAN{channel}:INV {'1' if invert else '0'}\n'.encode())
 
     def get_waveform(self, points: int = 4000, mode: str = "HRES", samples: int = 4) -> list[float]:
         """
@@ -171,9 +171,10 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Provided samples value is invalid!")
 
         self._conn.write(b':CHAN1:DISP 1\n') # Make sure channel 1 is enabled (we don't care about the status of channel 2)
-        self._conn.write(f':ACQ:POIN {points}\n'.encode()) # Set number of points to sample
-        self._conn.write(f':ACQ:TYPE {mode}\n'.encode()) # Set the acquisition mode
-        self._conn.write(f':ACQ:COUN {samples}\n'.encode()) # Set the number of samples to average in AVER mode
+        self._conn.write(f':ACQ:POIN {points}\n'.encode())
+        self._conn.write(f':ACQ:TYPE {mode}\n'.encode())
+        if mode == "AVER":
+            self._conn.write(f':ACQ:COUN {samples}\n'.encode())
 
         self._conn.write(b':WAV:DATA:ALL?\n') # Query header
         data: str = self._conn.read(128).decode()
@@ -232,22 +233,22 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid modulation depth value provided!")
 
         if freq == 0 or amp == 0:
-            self._conn.write(b':DDS:SWIT 0\n') # Turn off signal generator
+            self._conn.write(b':DDS:SWIT 0\n')
             return
 
-        self._conn.write(b':DDS:SWIT 1\n') # Turn on signal generator
-        self._conn.write(f':DDS:TYPE {typ}\n'.encode()) # Set signal type
-        self._conn.write(f':DDS:FREQ {freq}\n'.encode()) # Set signal frequency
-        self._conn.write(f':DDS:AMP {amp}\n'.encode()) # Set signal amplitude
-        self._conn.write(f':DDS:OFFS {offset}\n'.encode()) # Set signal offset
+        self._conn.write(b':DDS:SWIT 1\n')
+        self._conn.write(f':DDS:TYPE {typ}\n'.encode())
+        self._conn.write(f':DDS:FREQ {freq}\n'.encode())
+        self._conn.write(f':DDS:AMP {amp}\n'.encode())
+        self._conn.write(f':DDS:OFFS {offset}\n'.encode())
         self._conn.write(f':DDS:DUTY {duty}\n'.encode())
 
         if mod == "NONE":
-            self._conn.write(b':DDS:WAVE:MODE 0\n') # Turn modulation off
+            self._conn.write(b':DDS:WAVE:MODE 0\n')
             return
 
-        self._conn.write(b':DDS:WAVE:MODE 1\n') # Turn modulation on
-        self._conn.write(f':DDS:MODE:TYPE {mod}\n'.encode()) # Set modulation type
-        self._conn.write(f':DDS:MODE:WAVE:TYPE {mod_typ}\n'.encode()) # Set modulation wave type
-        self._conn.write(f':DDS:MODE:FREQ {mod_freq}\n'.encode()) # Set modulation frequency
-        self._conn.write(f':DDS:MODE:DEPT {mod_depth}\n'.encode()) # Set modualtion depth/deviation
+        self._conn.write(b':DDS:WAVE:MODE 1\n')
+        self._conn.write(f':DDS:MODE:TYPE {mod}\n'.encode())
+        self._conn.write(f':DDS:MODE:WAVE:TYPE {mod_typ}\n'.encode())
+        self._conn.write(f':DDS:MODE:FREQ {mod_freq}\n'.encode())
+        self._conn.write(f':DDS:MODE:DEPT {mod_depth}\n'.encode())
