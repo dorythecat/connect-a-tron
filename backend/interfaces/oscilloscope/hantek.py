@@ -128,7 +128,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
 
         :param channel: The channel to configure. (1 or 2)
         :param on: Wether the channel should be on or off.
-        :param scale: The vertical scale of the channel, in Volts per division. The range of the channel will be [-4 * scale, 4 * scale]. (0.001 * probe <= scale <= 10 * probe)
+        :param scale: The vertical scale of the channel, in Volts per division. The range of the channel will be [-4 * scale, 4 * scale]. (0.001 * probe < scale <= 10 * probe)
         :param offset: The vertical offset of the channel, in Volts. (-50 * probe <= offset <= 50 * probe)
         :param probe: The attenuation factor of the connected probe (1, 10, 50, or 100)
         :param invert: Wether to invert the channel or not.
@@ -142,7 +142,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid channel provided!")
         if probe not in [1, 10, 50, 100]:
             raise AttributeError("Invalid probe value provided!")
-        if not 0.001 <= (scale / probe) <= 10:
+        if not 0.001 < (scale / probe) <= 10:
             raise AttributeError("Invalid scale value provided!")
         if not -50 <= (offset / probe) <= 50:
             raise AttributeError("Invalid offset value provided!")
