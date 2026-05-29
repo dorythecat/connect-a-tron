@@ -10,7 +10,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
     @property
     def keypad_lock(self) -> bool:
         self._conn.write(b':SYST:LOCK?\n')
-        return self._conn.read(128).decode() == "ON"
+        return self._conn.read(8).decode() == "ON"
 
     @keypad_lock.setter
     def keypad_lock(self, value: bool) -> None:
@@ -34,7 +34,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid channel provided!")
 
         self._conn.write(f':MEAS:CHAN{channel}:ITEM? FREQ\n'.encode())
-        return float(self._conn.read(64).decode())
+        return float(self._conn.read(32).decode())
 
     def period(self, channel: int = 1) -> float:
         """
