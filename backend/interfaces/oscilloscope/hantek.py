@@ -16,6 +16,11 @@ class DSO2D15(oscilloscope.Oscilloscope):
     def keypad_lock(self, value: bool) -> None:
         self._conn.write(f':SYST:LOCK {int(value)}\n'.encode())
 
+    @property
+    def trigger_status(self) -> bool:
+        self._conn.write(b':TRIG:STAT?\n')
+        return self._conn.read(8).decode() != "NOTRIG"
+
     def frequency(self, channel: int = 1) -> float:
         """
         Get the frequency of the waveform currently being read by the oscilloscope on the specified channel.
@@ -76,6 +81,14 @@ class DSO2D15(oscilloscope.Oscilloscope):
         self._conn.write(f':MEAS:CHAN{channel}:ITEM? VPP\n'.encode())
         return float(self._conn.read(32).decode())
 
+    def force_trigger(self) -> None:
+        """
+        Force the oscilloscope to be triggered.
+
+        :returns: Nothing.
+        """
+        self._conn.write(b':TRIG:FORC\n')
+
     def time_conf(self, scale: float = 0.0005, offset: float = 0, mode: str = "MAIN", window: bool = False, window_scale: float = 0.0001, window_offset: float = 0) -> None:
         """
         Configures the time domain and all of its associated settings.
@@ -115,7 +128,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
 
         :param channel: The channel to configure. (1 or 2)
         :param on: Wether the channel should be on or off.
-        :param scale: The vertical scale of the channel, in Volts per division. (0.001 * probe <= scale <= 10 * probe)
+        :param scale: The vertical scale of the channel, in Volts per division. The range of the channel will be [-4 * scale, 4 * scale]. (0.001 * probe <= scale <= 10 * probe)
         :param offset: The vertical offset of the channel, in Volts. (-50 * probe <= offset <= 50 * probe)
         :param probe: The attenuation factor of the connected probe (1, 10, 50, or 100)
         :param invert: Wether to invert the channel or not.
@@ -150,6 +163,559 @@ class DSO2D15(oscilloscope.Oscilloscope):
         self._conn.write(f':CHAN{channel}:COUP {coupling}\n'.encode())
         self._conn.write(f':CHAN{channel}:BWL {'1' if bw_limit else '0'}\n'.encode())
         self._conn.write(f':CHAN{channel}:INV {'1' if invert else '0'}\n'.encode())
+
+    def trigger_conf_general(self, mode: str = "AUTO", holdoff: float = 0.000000016) -> None:
+        """
+        Configures the trigger, regardless of the chosen trigger type.
+
+        :param mode: The triggering mode. ("AUTO", "NORM", or "SING")
+        :param holdoff: Trigger holdoff time, aka, trigger recovery time; in seconds. Not relevant when using video, timeout, UART, LIN, CAN, I2C, or SPI trigger modes. (0.000000016 <= holdoff <= 10)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if mode not in ["AUTO", "NORM", "SING"]:
+            raise AttributeError("Invalid mode value provided!")
+        if not 0.000000016 <= holdoff <= 10:
+            raise AttributeError("Invalid holdoff value provided!")
+
+        self._conn.write(f':TRIG:SWE {mode}\n'.encode())
+        self._conn.write(f':TRIG:HOLD {holdoff}\n'.encode())
+
+    def trigger_conf_edge(self, source: int = 1, level: float = 0, slope: str = "RISI") -> None:
+        """
+        Configures the trigger for edge mode. The trigger will respond when a wave changes from above (or below) the configured level, to below (or above) said level, depending on the configured slope response.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param slope: Wether to trigger on rising, falling, or either slope. ("RISI", "FALL", or "EITH")
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if slope not in ["RISI", "FALL", "EITH"]:
+            raise AttributeError("Invalid slope value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale:
+            raise AttributeError("Invalid level value provided!")
+
+        self._conn.write(b':TRIG:MODE EDGE\n')
+        self._conn.write(f':TRIG:EDG:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:EDG:SLOP {slope}\n'.encode())
+        self._conn.write(f':TRIG:EDG:LEV {level}\n'.encode())
+
+    def trigger_conf_pulse(self, source: int = 1, level: float = 0, polarity: bool = True, width: float = 0.0000002, when: str = "GREA") -> None:
+        """
+        Configures the trigger for pulse mode. The trigger will respond when a pulse is sensed.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param polarity: Polarity of the pulse trigger. True is positive, False is negative.
+        :param width: Pulse width to compare against, in seconds. (0.000000008 <= width <= 10)
+        :param when: How to compare the width of the received pulse to the width value provided. ("EQUA", "NEQU", "GREA", or "LESS") (~5% error on comparison)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if not 0.000000008 <= width <= 10:
+            raise AttributeError("Invalid width value provided!")
+        if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
+            raise AttributeError("Invalid when value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale:
+            raise AttributeError("Invalid level value provided!")
+
+        self._conn.write(b':TRIG:MODE PULS\n')
+        self._conn.write(f':TRIG:PULS:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:PULS:POL {'POSI' if polarity else 'NEGA'}\n'.encode())
+        self._conn.write(f':TRIG:PULS:WHEN {when}\n'.encode())
+        self._conn.write(f':TRIG:PULS:WID {width}\n'.encode())
+        self._conn.write(f':TRIG:PULS:LEV {level}\n'.encode())
+
+    def trigger_conf_slope(self, source: int = 1, upper_level: float = 2, lower_level: float = -2, polarity: bool = True, width: float = 0.0000002, when: str = "GREA") -> None:
+        """
+        Configures the trigger for slope mode. The trigger will respond when a slope is sensed.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param upper_level: Upper trigger level, in Volts. (abs(upper_level) <= 4 * vert_scale) (see channel_conf)
+        :param lower_level: Lower trigger level, in Volts. (abs(lower_level) <= 4 * vert_scale) (see channel_conf)
+        :param polarity: Polarity of the slope trigger. True is positive, False is negative.
+        :param width: Pulse width to compare against, in seconds. (0.000000008 <= width <= 10)
+        :param when: How to compare the width of the received pulse to the width valued provided. ("EQUA", "NEQU", "GREA", or "LESS") (~5% error on comparison)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if upper_level <= lower_level:
+            raise AttributeError("The upper level value must be greater than the lower level value!")
+        if not 0.000000008 <= width <= 10:
+            raise AttributeError("Invalid width value provided!")
+        if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
+            raise AttributeError("Invalid when value provided!")
+        #Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(upper_level) > 4 * vert_scale:
+            raise AttributeError("Invalid upper level value provided!")
+        if abs(lower_level) > 4 * vert_scale:
+            raise AttributeError("Invalid lower level value provided!")
+
+        self._conn.write(b':TRIG:MODE SLOP\n')
+        self._conn.write(f':TRIG:SLOP:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:SLOP:POL {'POSI' if polarity else 'NEGA'}\n'.encode())
+        self._conn.write(f':TRIG:SLOP:WHEN {when}\n'.encode())
+        self._conn.write(f':TRIG:SLOP:WID {width}\n'.encode())
+        self._conn.write(f':TRIG:SLOP:ALEV {upper_level}\n'.encode())
+        self._conn.write(f':TRIG:SLOP:BLEV {lower_level}\n'.encode())
+
+    def trigger_conf_interval(self, source: int = 1, level: float = 0, slope: str = "RISI", time: float = 0.0000002, when: str = "GREA") -> None:
+        """
+        Configures the trigger for interval mode. The trigger will respond to edges of the specified type that satisfy the chosen compairson against the given time between them.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param slope: Wether to trigger on the rising, falling, or either slope. ("RISI", "FALL", or "DOUB")
+        :param time: Time to compare against, in seconds. (0.000000008 <= width <= 10)
+        :param when: How to compare the time between slopes against the width value provided. ("EQUA", "NEQU", "GREA", or "LESS")
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if slope not in ["RISI", "FALL", "DOUB"]:
+            raise AttributeError("Invalid slope value provided!")
+        if not 0.000000008 <= time <= 10:
+            raise AttributeError("Invalid width value provided!")
+        if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
+            raise AttributeError("Invalid when value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale:
+            raise AttributeError("Invalid level value provided!")
+
+        self._conn.write(b':TRIG:MODE INT\n')
+        self._conn.write(f':TRIG:INTERVAL:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:INTERVAL:SLO {slope}\n'.encode())
+        self._conn.write(f':TRIG:INTERVAL:WHEN {when}\n'.encode())
+        self._conn.write(f':TRIG:INTERVAL:TIME {time}\n'.encode())
+        self._conn.write(f':TRIG:INTERVAL:ALEV {level}\n'.encode())
+
+    def trigger_conf_underthrow(self, source: int = 1, upper_level: float = 2, lower_level: float = -2, polarity: bool = True, time: float = 0.0000002, when: str = "GREA") -> None:
+        """
+        Configures the trigger for underthrow mode. The trigger will respond when the signal triggers the lower level and not the upper level (if polarity is positive), or if it triggers the upper level, and not the lower level (if polarity is negative).
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param upper_level: Upper trigger level, in Volts. (abs(upper_level) <= 4 * vert_scale) (see channel_conf)
+        :param lower_level: Lower trigger level, in Volts. (abs(lower_level) <= 4 * vert_scale) (see channel_conf)
+        :param polarity: Polarity of the trigger. True is positive, False is negative.
+        :param time: Time to compare against, in seconds. (0.000000008 <= time <= 10)
+        :param when:: How to compare the time value provided againt the signal. ("EQUA", "NEQU", "GREA", or "LESS")
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if upper_level <= lower_level:
+            raise AttributeError("The upper level value must be greater than the lower level value!")
+        if not 0.000000008 <= time <= 10:
+            raise AttributeError("Invalid time value provided!")
+        if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
+            raise AttributeError("Invalid when value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(upper_level) > 4 * vert_scale:
+            raise AttributeError("Invalid upper level value provided!")
+        if abs(lower_level) > 4 * vert_scale:
+            raise AttributeError("Invalid lower level value provided!")
+
+        self._conn.write(b':TRIG:MODE UND\n')
+        self._conn.write(f':TRIG:UNDER_A:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:UNDER_A:POL {'POSI' if polarity else 'NEGA'}\n'.encode())
+        self._conn.write(f':TRIG:UNDER_A:WHEN {when}\n'.encode())
+        self._conn.write(f':TRIG:UNDER_A:TIME {time}\n'.encode())
+        self._conn.write(f':TRIG:UNDER_A:ALEV {upper_level}\n'.encode())
+        self._conn.write(f':TRIG:UNDER_A:BLEV {lower_level}\n'.encode())
+
+    def trigger_conf_timeout(self, source: int = 1, level: float = 0, polarity: bool = True, width: float = 0.0000002) -> None:
+        """
+        Configures the trigger for timeout (also known as overtime or dropout) mode. The trigger will respond when the signal has an edge spaced by a time lesser or equal to the specified width.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param polarity: Polarity of the trigger. True is positive, False is negative.
+        :param width: Maximum spacing between two triggering edges, in seconds. (0.000000008 <= width <= 10)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if not 0.000000008 <= width <= 10:
+            raise AttributeError("Invalid width value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale:
+            raise AttributeError("Invalid level value provided!")
+
+        self._conn.write(b':TRIG:MODE TIM\n')
+        self._conn.write(f':TRIG:TIM:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:TIM:LEV {level}\n'.encode())
+        self._conn.write(f':TRIG:TIM:WID {width}\n'.encode())
+        self._conn.write(f':TRIG:TIM:POL {'POSI' if polarity else 'NEGA'}\n'.encode())
+
+    def trigger_conf_window(self, source: int = 1, upper_level: float = 2, lower_level: float = -2) -> None:
+        """
+        Configures the trigger for window mode. The trigger will respond when the signal is within the upper or lower trigger level.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param upper_level: Upper trigger level, in Volts. (abs(upper_level) <= 4 * vert_scale) (see channel_conf)
+        :param lower_level: Lower trigger level, in Volts. (abs(lower_level) <= 4 * vert_scale) (see channel_conf)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if upper_level <= lower_level:
+            raise AttributeError("The upper level value must be greater than the lower level value!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(upper_level) > 4 * vert_scale:
+            raise AttributeError("Invalid upper level value provided!")
+        if abs(lower_level) > 4 * vert_scale:
+            raise AttributeError("Invalid lower level value provided!")
+
+        self._conn.write(b':TRIG:MODE WIN\n')
+        self._conn.write(f':TRIG:WINDO:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:WINDO:ALEV {upper_level}\n'.encode())
+        self._conn.write(f':TRIG:WINDO:BLEV {lower_level}\n'.encode())
+
+    def trigger_conf_pattern(self, pattern: str = "R,X", levels: str = "1,0;2,0") -> None:
+        """
+        Configures the trigger for pattern mode. The trigger will respond if all conditions given are met. See parameter description on how to pass these conditions.
+
+        :param pattern: Two letters, comma-separated, indicating what the pattern should be. First letter is channel one, second letter is channel 2. "X" ignores the channel, "L" triggers when low, "H" triggers when high, "F" triggers on falling edge, "R" triggers on rising edge, and "D" triggers on either falling or rising edge.
+        :param levels: Channel trigger levels, in Volts. Following the scheme: "1,0.16;2,0". (abs(level) <= 4 * vert_scale) (see channel_conf)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        pattern_list: list[str] = pattern.split(",")
+        levels_list: list[str] = levels.split(";")
+        if len(pattern_list) != 2:
+            raise AttributeError("Invalid pattern value provided! Exactly two channels must be provided!")
+        for p in pattern_list:
+            if p.strip() not in ["X", "L", "H", "F", "R", "D"]:
+                raise AttributeError(f"Invalid pattern value provided! \"{p.strip()}\" is not an allowed setting!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        for channel in [1, 2]:
+            self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+            vert_scale = float(self._conn.read(32).decode())
+            if abs(levels_list[channel - 1][1]) > 4 * vert_scale:
+                raise AttributeError(f"Invalid levels value provided! Channel {channel}'s level is out of range!") trigger.
+
+Parameters
+ 
+:<condition
+
+        self._conn.write(b':TRIG:MODE PATT\n')
+        self._conn.write(f':TRIG:PATT:PATT {pattern}\n'.encode())
+        for channel in [0, 1]:
+            self._conn.write(f':TRIG:PATT:LEV CHAN{levels_list[channel]}\n'.encode())
+
+    def trigger_conf_video(self, source: int = 1, level: float = 0, polarity: bool = True, standard: str = "PAL", mode: str = "ALIN", line: int = 1) -> None:
+        """
+        Configures the trigger for video (also known as TV) mode. The trigger will respond when it detects a PAL/NTSC (depending on configured mode) television broadcast signal on the chosen channel.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param polarity: Polarity of the trigger signal. True is positive, False is negative.
+        :param standard: What video standard to use. ("NTSC" or "PAL")
+        :param mode: What trigger mode to use. ("ALIN", "LINE", "FIE1", or "FIE2")
+        :param line: What line to trigger on, when on line mode. (1 <= line <= (525 if NTSC, 625 if PAL))
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Provided source value is invalid!")
+        if standard not in ["NTSC", "PAL"]:
+            raise AttributeError("Provided standard value is invalid!")
+        if mode not in ["ALIN", "LINE", "FIE1", "FIE2"]:
+            raise AttributeError("Provided mode value is invalid!")
+        if not 1 <= line <= (525 if standard == "NTSC" else 625):
+            raise AttributeError("Provided line value is invalid!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale:
+            raise AttributeError("Invalid level value provided!")
+
+        sel trigger.
+
+Parameters
+ 
+:<conditionf._conn.write(b':TRIG:MODE TV\n')
+        self._conn.write(f':TRIG:TV:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:TV:POL {'POSI' if polarity else 'NEGA'}\n'.encode())
+        self._conn.write(f':TRIG:TV:MODE {mode}\n'.encode())
+        self._conn.write(f':TRIG:TV:STAN {standard}\n'.encode())
+        self._conn.write(f':TRIG:VID:LEV {level}\n'.encode())
+        if mode == "LINE":
+            self._conn.write(f':TRIG:TV:LINE {line}\n')
+
+    def trigger_conf_uart(self, source: int = 1, level: float = 0, width: int = 8, baud_rate: int = 9600, parity: str = "NONE", data: int = 0xff, condition: str = "START") -> None:
+        """
+        Configures the trigger for UART mode. The trigger will respond to UART data sent on the selected channel.
+
+        :param source: Channel to use as source of the signal to trigger with. (1 or 2)
+        :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param width: Data width, in bits. (5, 6, 7, 8)
+        :param baud_rate: Baud rate of the UART communication, in bits per second. 0 for "USER" setting. (0, 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 230400, 380400, 460400, or 921600)
+        :param parity: Parity bit setting. ("NONE", "ODD", or "EVEN")
+        :param data: Data to trigger at when trigger mode is "READ_DATA". (0 <= data <= 2^(width - 1) - 1)
+        :param condition: Trigger condition. ("START", "STOP", "READ_DATA", "PARITY_ERR", or "COM_ERR")
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Provided source value is invalid!")
+        if width not in [5, 6, 7, 8]:
+            raise AttributeError("Provided width value is invalid!")
+        if baud_rate not in [0, 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 230400, 380400, 464400, 921600]:
+            raise AttributeError("Provided baud rate value is invalid!")
+        if parity not in ["NONE", "ODD", "EVEN"]:
+            raise AttributeError("Provided parity value is invalid!")
+        if not 0 <= data <= 2**(width - 1) - 1:
+            raise AttributeError("Provided data value is invalid!")
+        if condition not in ["START", "STOP", "READ_DATA", "PARITY_ERR", "COM_ERR"]:
+            raise AttributeError("Provided condition value is invalid!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale: trigger.
+
+Parameters
+ 
+:<condition
+            raise AttributeError("Invalid level value provided!")
+
+        self._conn.write(b':TRIG:MODE UART\n')
+        self._conn.write(f':TRIG:UART:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:UART:COND {condition}\n'.encode())
+        self._conn.write(f':TRIG:UART:BAU {'USER' if baud_rate == 0 else baud_rate}\n'.encode())
+        self._conn.write(f':TRIG:UART:ALEV {level}\n'.encode())
+        if condition == "READ_DATA":
+            self._conn.write(f':TRIG:UART:DATA {data}\n'.encode())
+        elif condition in ["PARITY_ERR", "COM_ERR"]:
+            self._conn.write(f':TRIG:UART:WIDT {width}\n'.encode())
+            self._conn.write(f':TRIG:UART:PARI {parity}\n'.encode())
+
+    def trigger_conf_spi(self, source_sda: int = 1, source_scl: int = 2, level_sda: float = 0, level_scl: float = 0, clock_edge: bool = True, width: int = 8, data: int = 0xff, mask: int = 0) -> None:
+        """
+        Configures the trigger for SPI mode. The trigger will respond to SPI data sent on the selected channels.
+
+        :param source_sda: Channel to use as source of the data signal. (1 or 2)
+        :param source_scl: Channel to use as source of the clock signal. (1 or 2)
+        :param level_sda: Trigger level of the data signal. (abs(level_sda) <= 4 * vert_scale) (see channel_conf)
+        :param level_scl: Trigger level of the clock signal. (abs(level_scl) <= 4 * vert_scale) (see channel_conf)
+        :param clock_edge: Type of clock edge triggered by SPI. True means rising, False means falling.
+        :param width: Bit width of the SPI signal. (4 <= width <= 32)
+        :param data: Data value to trigger to. (0 <= data <= 4294967295)
+        :param mask: Mask to trigger to. (0 <= mask <= 4294967295)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source_sda not in [1, 2]:
+            raise AttributeError("Invalid data source value provided!")
+        if source_scl not in [1, 2]:
+            raise AttributeError("Invalid clock source value provided!")
+        if source_sda == source_scl:
+            raise AttributeError("Data and clock source channels can't be the same!")
+        if not 4 <= width <= 32:
+            raise AttributeError("Invalid width value provided!")
+        if not 0 <= data <= 4294967295:
+            raise AttributeError("Invalid data value provided!")
+        if not 0 <= mask <= 4294967295:
+            raise AttributeError("Invalid mask value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source_sda}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level_sda) > 4 * vert_scale:
+            raise AttributeError("Invalid data level value provided!")
+        self._conn.write(f':SCHAN{source_scl}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level_scl) > 4 * vert_scale:
+            raise AttributeError("Invalid clock level value provided!")
+
+        self._conn.write(b':TRIG:MODE SPI@sþ\n')
+        self._conn.write(f':TRIG:SPI:SDA:SOUR CHAN{source_sda}\n'.encode())
+        self._conn.write(f':TRIG:SPI:SCL:SOUR CHAN{source_scl}\n'.encode())
+        self._conn.write(f':TRIG:SPI:SCK {'R' if clock_edge else 'F'}\n'.encode())
+        self._conn.write(f':TRIG:SPI:WID {width}\n'.encode())
+        self._conn.write(f':TRIG:SPI:DATA {data}\n'.encode())
+        self._conn.write(f':TRIG:SPI:MASK {mask}\n'.encode())
+        self._conn.write(f':TRIG:SPI:ALEV {level_scl}\n'.encode())
+        self._conn.write(f':TRIG:SPI:BLEV {level_sda}\n'.encode())
+
+    def trigger_conf_i2c(self, source_sda: int = 1, source_scl: int = 2, level_sda: float = 0, level_scl: float = 0, address: int = 0x3f, data: int = 0xff, data_index: int = 0, condition: str = "START") -> None:
+        """
+        Configures the trigger for I2C mode. The trigger will respond to I2C data sent on the selected channels.
+
+        :param source_sda: Channel to use as source of the data signal. (1 or 2)
+        :param source_scl: Channel to use as source of the clock signal. (1 or 2)
+        :param level_sda: Trigger level of the data signal. (abs(level_sda) <= 4 * vert_scale) (see channel_conf)
+        :param level_scl: Trigger level of the clock signal. (abs(level_scl) <= 4 * vert_scale) (see channel_conf)
+        :param address: The I2C adress on which the trigger will respond. (0 <= address <= 255)
+        :param data: The data on which the trigger will respond. (0 <= data <= 255)
+        :param data_index: The index of the I2C data. (0 <= data_index <= 8)
+        :param condition: The condition under which to trigger. ("START", "STOP", "ACK_LOST", "ADDR_NO_ACK", "RESTART", or "READ_DATA")
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source_sda not in [1, 2]:
+            raise AttributeError("Invalid data source value provided!")
+        if source_scl not in [1, 2]:
+            raise AttributeError("Invalid clock source value provided!")
+        if source_sda == source_scl:
+            raise AttributeError("Data and clock source channels can't be the same!")
+        if not 0 <= address <= 255:
+            raise AttributeError("Invalid address value provided!")
+        if not 0 <= data <= 255:
+            raise AttributeError("Invalid data value provided!")
+        if not 0 <= data_index <= 8:
+            raise AttributeError("Invalid data index value provided!")
+        if condition not in ["START", "STOP", "ACK_LOST", "ADDR_NO_ACK", "RESTART", "READ_DATA"]:
+            raise AttributeError("Invalid condition value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source_sda}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if level_sda > 4 * vert_scale:
+            raise AttributeError("Invalid data level value provided!")
+        self._conn.write(f':CHAN{source_scl}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if level_scl > 4 * vert_scale:
+            raise AttributeError("Invalid clock level value provided!")
+
+        self._conn.write(b':TRIG:MODE IIC\n')
+        self._conn.write(f':TRIG:IIC:SDA:SOUR CHAN{source_sda}\n'.encode())
+        self._conn.write(f':TRIG:IIC:SCL:SOUR CHAN{source_scl}\n'.encode())
+        self._conn.write(f':TRIG:IIC:CON {condition}\n'.encode())
+        self._conn.write(f':TRIG:IIC:ALEV {level_scl}\n'.encode())
+        self._conn.write(f':TRIG:IIC:BLEV {level_sda}\n'.encode())
+        if condition in ["ADDR_NO_ACK", "READ_DATA"]:
+            self._conn.write(f':TRIG:IIC:ADD {address}\n'.encode())
+        if condition == "READ_DATA":
+            self._conn.write(f':TRIG:IIC:DATA {data_index},{data}\n'.encode())
+
+    def trigger_conf_can(self, source: int = 1, level: float = 0, baud_rate: int = 125000, idle: bool = True, identifier: int = 0, data_len: int = 0, data: int = 0xff, data_index: int = 0, condition: str = "FRAM_STARE") -> None:
+        """
+        Configures the trigger for CAN mode. The trigger will respond to CAN data sent on the specified channel.
+
+        :param source: Channel to use as source of the data. (1 or 2)
+        :param level: Trigger level of the channel. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param baud_rate: The baud rate of the CAN bus. Use 0 for "USER" setting. (0, 10000, 20000, 33300, 50000, 62500, 83300, 100000, 125000, 250000, 500000, 800000, or 1000000)
+        :param idle: The idle level of the CAN bus. True is high, False is low.
+        :param identifier: The identifier to trigger to. (0 <= identifier <= 28)
+        :param data_len: The data length code of the CAN bus. (0 <= data_len <= 15)
+        :param data: The data to trigger to. (0 <= data <= 255)
+        :param data_index: Index of the data. (0 <= data_index <= 3)
+        :param condition: The condition  to trigger under. ("FRAM_STARE", "FRAM_REMO_ID", "FRAM_DATA_ID", "REMO", "DATA", "FRAM_REMO_ID_EXT", "FRAM_DATA_ID_EXT", "FRAM_REE", "FRAM_OVERLOAD", "ERR_ALL", or "ACK_ERR")
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if baud_rate not in [0, 10000, 20000, 33300, 50000, 62500, 83300, 100000, 125000, 250000, 500000, 800000, 1000000]:
+            raise AttributeError("Invalid baud rate value provided!")
+        if not 0 <= identifier <= 28:
+            raise AttributeError("Invalid identifier value provided!")
+        if not 0 <= data_len <= 15:
+            raise AttributeError("Invalid data length value provided!")
+        if not 0 <= data <= 255:
+            raise AttributeError("Invalid data value provided!")
+        if not 0 <= data_index <= 3:
+            raise AttributeError("Invalid data index value provided!")
+        if condition not in ["FRAM_STARE", "FRAM_REMO_ID", "FRAM_DATA_ID", "REMO", "DATA", "FRAM_REMO_ID_EXT", "FRAM_REE", "FRAM_OVERLOAD", "ERR_ALL", "ACK_ERR"]:
+            raise AttributeError("Invalid condition value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n'.encode())
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale:
+            raise AttributeError("Invalid level value provided!")
+
+        self._conn.write(b':TRIG:MODE CAN\n')
+        self._conn.write(f':TRIG:CAN:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:CAN:IDL {'HIGH' if idle else 'LOW'}\n'.encode())
+        self._conn.write(f':TRIG:CAN:BAU {'USER' if baud_rate == 0 else baud_rate}\n'.encode())
+        self._conn.write(f':TRIG:CAN:CON {condition}\n'.encode())
+        self._conn.write(f':TRIG:CAN:ID {identifier}\n'.encode())
+        self._conn.write(f':TRIG:CAN:DLC {data_len}\n'.encode())
+        self._conn.write(f':TRIG:CAN:DATA {data_index},{data}\n'.encode())
+        self._conn.write(f':TRIG:CAN:ALEV {level}\n'.encode())
+
+    def trigger_conf_lin(self, source: int = 1, level: float = 0, baud_rate: int = 115200, idle: bool = True, identifier: int = 0, data: int = 0xff, data_index: int = 0, condition: str = "IDENTIFIER") -> None:
+        """
+        Configures the trigger for LIN mode. The trigger will respond to LIN data sent on the specified channel.
+
+        :param source: Channel to use as source of the data. (1 or 2)
+        :param level: Trigger level of the channle. (abs(level) <= 4 * vert_scale) (see channel_conf)
+        :param baud_rate: Baud rate of the LIN data. Use 0 for "USER" setting. (0, 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 230400, 380400, 460400, or 921600)
+        :param idle: Idle level triggered by LIN bus. True for high, False for low.
+        :param identifier: Identifier to trigger to. (0 <= identifier <= 63)
+        :param data: Data to trigger to. (0 <= data <= 255)
+        :param data_index: Data index of data. (0 <= data_index <= 3)
+        :param condition: Condition to trigger to. ("INTERVAL_FIELD", "SYNC_FIELD", "ID_FIELD", "DATA", "IDENTIFIER", or "ID_DATA")
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if source not in [1, 2]:
+            raise AttributeError("Invalid source value provided!")
+        if baud_rate not in [0, 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 230400, 380400, 460400, 921600]:
+            raise AttributeError("Invalid baud rate value provided!")
+        if not 0 <= identifier <= 63:
+            raise AttributeError("Invalid identifier value provided!")
+        if not 0 <= data <= 255:
+            raise AttributeError("Invalid data value provided!")
+        if not 0 <= data_index <= 3:
+            raise AttributeError("Invalid data index value provided!")
+        if condition not in ["INTERVAL_FIELD", "SYNC_FIELD", "ID_FIELD", "DATA", "IDENTIFIER", "ID_DATA"]:
+            raise AttributeError("Invalid condition value provided!")
+        # Check this last so we don't waste time if any of the other values are invalid
+        self._conn.write(f':CHAN{source}:SCAL?\n')
+        vert_scale = float(self._conn.read(32).decode())
+        if abs(level) > 4 * vert_scale:
+            raise AttributeError("Invalid level value provided!")
+
+        self._conn.write(b':TRIG:MODE LIN\n')
+        self._conn.write(f':TRIG:LIN:SOUR CHAN{source}\n'.encode())
+        self._conn.write(f':TRIG:LIN:IDL {'HIGH' if idle else 'LOW'}'.encode())
+        self._conn.write(f':TRIG:LIN:BAU {'USER' if baud_rate == 0 else baud_rate}\n'.encode())
+        self._conn.write(f':TRIG:LIN:CON {condition}\n'.encode())
+        self._conn.write(f':TRIG:LIN:ID {identifier}\n'.encode())
+        self._conn.write(f':TRIG:LIN:DATA {data_index},{data}\n'.encode())
+        self._conn.write(f':TRIG:LIN:ALEV {level}\n'.encode())
 
     def get_waveform(self, points: int = 4000, mode: str = "HRES", samples: int = 4) -> list[float]:
         """
