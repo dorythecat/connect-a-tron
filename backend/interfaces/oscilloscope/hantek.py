@@ -9,14 +9,14 @@ class DSO2D15(oscilloscope.Oscilloscope):
 
     # Helper functions for the serial connection
     # These don't have any protections or description because they're only meant for internal use
-    def _scpi_send(command: str) -> None:
+    def _scpi_send(self, command: str) -> None:
         self._conn.write(f'{command}\n'.encode())
 
-    def _scpi_get_str(command: str, max_size: int = 8) -> str:
+    def _scpi_get_str(self, command: str, max_size: int = 8) -> str:
         self._conn.write(f'{command}\n'.encode())
         return self._conn.read(max_size).decode()
 
-    def _scpi_get_float(command: str, max_size: int = 16) -> float:
+    def _scpi_get_float(self, command: str, max_size: int = 16) -> float:
         self._conn.write(f'{command}\n'.encode())
         return float(self._conn.read(max_size).decode())
 
