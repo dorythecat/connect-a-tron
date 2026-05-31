@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Path, Query
+from fastapi import FastAPI, Path, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, BeforeValidator, model_validator
 from typing import Annotated, Literal
+from typing_extensions import Self
 from enum import Enum
 
 import interfaces.dmm.dmm as dmm
@@ -89,19 +90,19 @@ class Keithley2000Measure(BaseModel):
 @app.get("/dmm/keithley2000/measure/{typ}", tags=["DMM"])
 async def keithley2000_measure(data: Keithley2000Measure = Depends()) -> float:
     keithley2000.measure_set(
-            dmm.MType(data.typ),
-            data.nplc,
-            data.samples,
-            data.mov,
-            data.digits,
-            data.thr,
-            data.bandwidth,
-            data.ttype.value,
-            data.tref,
-            data.simtemp,
-            data.tcoef,
-            data.voff
-        )
+        dmm.MType(data.typ),
+        data.nplc,
+        data.samples,
+        data.mov,
+        data.digits,
+        data.thr,
+        data.bandwidth,
+        data.ttype.value,
+        data.tref,
+        data.simtemp,
+        data.tcoef,
+        data.voff
+    )
     return keithley2000.measure_get()
 
 @app.get("/dmm/keithley2000/input", tags=["DMM"])
@@ -152,3 +153,42 @@ async def keithley2000_key_press(key: int) -> None:
 @app.get("/oscilloscope/hantek_dso2d15", tags=["Oscilloscope"])
 async def hantek_dso2d15_id() -> str:
     return hantek_dso2d15.id
+
+# TODO(maybe): Support more trigger modes than just EDGE
+class HantekDSO2D15GetWaveform(BaseModel):
+    channel: Annotated[Literal[1], BeforeValidator(int), Query(title="Channel to read waveform from")] = 1 # TODO: Support channel 2
+    probe: Annotated[Literal[1, 10, 50, 100], BeforeValidator(int), Query(title="Attenuation factor of the connected probe")] = 1
+    volt_scale: Annotated[float, Query(title="Vertiroot_validator not definedcal scale of the measurement, in volts per division", ge=0.001, le=1000)] = 1
+    volt_offset: Annotated[float, Query(title="Voltage offset from the ground point, in Volts")] = 0
+    time_scale: Annotated[Literal[0.000000002, 0.000000005, 0.00000001, 0.00000002, 0.00000005, 0.0000001, 0.0000002, 0.0000005, 0.000001, 0.000002, 0.000005, 0.00001, 0.00002, 0.00005, 0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100], BeforeValidator(float), Query(title="Horizontal scale of the measurement, in seconds per division")] = 0.0005
+    time_offset: Annotated[float, Query(title="Time offset from the trigger point, in seconds")] = 0
+    invert: Annotated[bool, Query(title="Wether to invert the waveform")] = False
+    coupling: Annotated[Literal["DC", "AC", "GND"], Query(title="Coupling mode to use for the measurement")] = "DC"
+    bw_limit: Annotated[bool, Query(title="Wether to activate the 20MHz bandwith filter, to filter out high frequency noise")] = False
+    trigger_level: Annotated[float, Query(title="Trigger level, in Volts")] = 0
+    trigger_slope: Annotated[Literal["RISI", "FALL", "EITH"], Query("Wether to trigger on the rising, falling, or either slope")] = "RISI"
+
+    @model_validator(mode='after')
+    def verify(self) -> Self:
+        if not 0.001 < (self.volt_scale / self.probe) <= 10:
+            raise ValueError("Vertical scale out of bounds!")
+        if abs(self.volt_offset) > 50 * self.probe:
+            raise ValueError("Vertical offset out of bounds!")
+        if abs(self.trigger_level) > 4 * self.volt_scale:
+            raise ValueError("Trigger level out of bounds!")
+        return self
+
+@app.get("/oscilloscope/hantek_dso2d15/waveform/get", tags=["Oscilloscope"])
+def hantek_dso2d15_get_waveform(data: HantekDSO2D15GetWaveform = Depends()) -> list[float]:
+    hantek_dso2d15.channel_conf(
+        channel=data.channel,
+        scale=data.volt_scale,
+        offset=data.volt_offset,
+        probe=data.probe,
+        invert=data.invert,
+        coupling=data.coupling,
+        bw_limit=data.bw_limit
+    )
+    hantek_dso2d15.time_conf(scale=data.time_scale, offset=data.time_offset)
+    hantek_dso2d15.trigger_conf_edge(data.channel, data.trigger_level, data.trigger_slope)
+    return hantek_dso2d15.get_waveform()
