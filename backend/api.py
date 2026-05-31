@@ -178,7 +178,7 @@ class HantekDSO2D15GetWaveform(BaseModel):
             raise ValueError("Trigger level out of bounds!")
         return self
 
-@app.get("/oscilloscope/hantek_dso2d15/waveform/get", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/waveform", tags=["Oscilloscope"])
 def hantek_dso2d15_get_waveform(data: HantekDSO2D15GetWaveform = Depends()) -> list[float]:
     hantek_dso2d15.channel_conf(
         channel=data.channel,
@@ -210,7 +210,7 @@ class HantekDSO2D15SetWaveform(BaseModel):
             raise ValueError("Modulation depth out of bounds!")
         return self
 
-@app.post("/oscilloscope/hantek_dso2d15/waveform/set", tags=["Oscilloscope"])
+@app.post("/oscilloscope/hantek_dso2d15/waveform", tags=["Oscilloscope"])
 def hantek_dso2d15_set_waveform(data: HantekDSO2D15SetWaveform = Depends()) -> None:
     hantek_dso2d15.set_waveform(
         data.freq, data.amp, data.offset, data.typ, data.duty, data.mod, data.mod_type, data.mod_freq, data.mod_depth
