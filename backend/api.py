@@ -192,3 +192,26 @@ def hantek_dso2d15_get_waveform(data: HantekDSO2D15GetWaveform = Depends()) -> l
     hantek_dso2d15.time_conf(scale=data.time_scale, offset=data.time_offset)
     hantek_dso2d15.trigger_conf_edge(data.channel, data.trigger_level, data.trigger_slope)
     return hantek_dso2d15.get_waveform()
+
+class HantekDSO2D15SetWaveform(BaseModel):
+    freq: Annotated[float, Query(title="Frequency of the wave, in Hertz", ge=0.1, le=25000000)] = 1000
+    amp: Annotated[float, Query(title="Amplitude of the wave, in Volts", ge=0.01, le=7)] = 1
+    offset: Annotated[float, Query(title="Voltage offset of the wave, in Volts", ge=-3, le=3)] = 0
+    typ: Annotated[Literal["SINE", "SQUA", "RAMP", "EXP", "NOIS", "DC", "ARB1", "ARB2", "ARB3", "ARB4"], Query(title="Type of the generated wave")] = "SINE"
+    duty: Annotated[int, Query(title="Duty cycle of the wave, in percentage", ge=0, le=100)] = 50
+    mod: Annotated[Literal["NONE", "AM", "FM"], Query(title="Type of modulation to apply to the wave")] = "NONE"
+    mod_type: Annotated[Literal["SINE", "SQUA", "RAMP"], Query(title="Waveform to modulate into the wave")] = "SINE"
+    mod_freq: Annotated[int, Query(title="Frequency of modulation, in Hertz", ge=100, le=50000)] = 1000
+    mod_depth: Annotated[int, Query(title="In AM modulation, the modulation depth. In FM modulation, the modulation deviation", ge=100, le=50000)] = 100
+
+    @model_validator(mode='after')
+    def verify(self) -> Self:
+        if self.mod_type == "FM" and self.mod_depth > 10000:
+            raise ValueError("Modulation depth out of bounds!")
+        return self
+
+@app.post("/oscilloscope/hantek_dso2d15/waveform/set", tags=["Oscilloscope"])
+def hantek_dso2d15_set_waveform(data: HantekDSO2D15SetWaveform = Depends()) -> None:
+    hantek_dso2d15.set_waveform(
+        data.freq, data.amp, data.offset, data.typ, data.duty, data.mod, data.mod_type, data.mod_freq, data.mod_depth
+    )
