@@ -1,4 +1,4 @@
-import backend.interfaces.oscilloscope.oscilloscope as oscilloscope
+import interfaces.oscilloscope.oscilloscope as oscilloscope
 
 class DSO2D15(oscilloscope.Oscilloscope):
     def __init__(self, port: str = "/dev/usbtmc0") -> None:
@@ -23,6 +23,10 @@ class DSO2D15(oscilloscope.Oscilloscope):
     def _scpi_get_float(self, command: str, size: int = 16) -> float:
         self._conn.write(command.encode('unicode_escape'))
         return float(self._conn.read(size).decode('unicode_escape'))
+
+    @property
+    def id(self) -> str:
+        return self._scpi_get_str('*IDN?', 32)
 
     @property
     def keypad_lock(self) -> bool:
@@ -236,7 +240,6 @@ class DSO2D15(oscilloscope.Oscilloscope):
         :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
         :param polarity: Polarity of the pulse trigger. True is positive, False is negative.
         :param width: Pulse width to compare against, in seconds. (0.000000008 <= width <= 10)
-n hantek_testing.py
         :param when: How to compare the width of the received pulse to the width value provided. ("EQUA", "NEQU", "GREA", or "LESS") (~5% error on comparison)
 
         :returns: Nothing.
@@ -474,7 +477,6 @@ n hantek_testing.py
         self._scpi_send(f':TRIG:TV:SOUR CHAN{source}')
         self._scpi_send(f':TRIG:TV:POL {'POSI' if polarity else 'NEGA'}')
         self._scpi_send(f':TRIG:TV:MODE {mode}')
-n hantek_testing.py
         self._scpi_send(f':TRIG:TV:STAN {standard}')
         self._scpi_send(f':TRIG:VID:LEV {level}')
         if mode == "LINE":

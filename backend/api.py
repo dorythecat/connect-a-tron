@@ -7,6 +7,8 @@ from enum import Enum
 import interfaces.dmm.dmm as dmm
 import interfaces.dmm.keithley as keithley
 
+import interfaces.oscilloscope.hantek as hantek
+
 app = FastAPI(
     title="Connect-a-tron API",
     summary="API for Connect-a-tron web service",
@@ -22,6 +24,10 @@ app = FastAPI(
         {
             "name": "DMM",
             "description": "A DMM, or digital multimeter, is a device that can measure various values on a circuit, like voltage, current, and resistance, amongst others."
+        },
+        {
+            "name": "Oscilloscope",
+            "description": "An oscilloscope is a device that can sample voltages at a fast enough rate and with enough accuraccy as to allow viewing the waveforms of said voltage."
         }
     ],
     license_info={
@@ -41,19 +47,27 @@ app.add_middleware(
 )
 
 # TODO: Load instrumets from a configuration file
-keithley2000 = keithley.Keithley2000()
+#keithley2000 = keithley.Keithley2000()
+keithley2000 = None
+hantek_dso2d15 = hantek.DSO2D15()
 
 @app.get("/system/interfaces", tags=["System"])
 async def interfaces() -> dict:
     """
-    Displays the available interfaces on this API.
+    Displayself._scpi_send(':MEAS:ENAB 1') # Enable measurement
+        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurementss the available interfaces on this API.
     """
     return {
             "dmm": [
                 "keithley2000"
+            ],
+            "oscilloscope": [
+                "hantek_dso2d15"
             ]
     }
 
+# Keithley 2000
 @app.get("/dmm/keithley2000", tags=["DMM"])
 async def keithley2000_id() -> str:
     return keithley2000.id
@@ -124,3 +138,8 @@ async def keithley2000_key_press() -> int:
 @app.post("/dmm/keithley2000/key_press", tags=["DMM"])
 async def keithley2000_key_press(key: int) -> None:
     keithley2000.key_press = key
+
+# Hantek DSO2D15
+@app.get("/oscilloscope/hantek_dso2d15", tags=["Oscilloscope"])
+async def hantek_dso2d15_id() -> str:
+    return hantek_dso2d15.id
