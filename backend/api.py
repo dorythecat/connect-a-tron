@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Path, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Annotated
+from typing import Annotated, Literal
 from enum import Enum
 
 import interfaces.dmm.dmm as dmm
@@ -72,11 +72,6 @@ async def interfaces() -> dict:
 async def keithley2000_id() -> str:
     return keithley2000.id
 
-class ThermocoupleType(Enum):
-    J = "J"
-    K = "K"
-    T = "T"
-
 class Keithley2000Measure(BaseModel):
     typ: Annotated[int, Path(title="Type of measurement to take", ge=1, le=11)]
     nplc: Annotated[float, Query(title="Number of powerline cycles per measurement", ge=0.01, le=10)] = 10
@@ -85,9 +80,9 @@ class Keithley2000Measure(BaseModel):
     digits: Annotated[int, Query(title="Number of digits to display", ge=4, le=7)] = 7
     thr: Annotated[int, Query(title="Threshold for continuity, in Ohms", ge=1, le= 1000)] = 10
     bandwidth: Annotated[int, Query(title="Bandwidth for AC measurements, in Hertz", ge=3, le=300000)] = 30
-    ttype: Annotated[ThermocoupleType, Query(title="Type of thermocouple attached to the multimeter")] = ThermocoupleType.J
+    ttype: Annotated[Literal["J", "K", "T"], Query(title="Type of thermocouple attached to the multimeter")] = "J"
     tref: Annotated[bool, Query(title="Wether to use a simulated (False) or real (True) thermocouple")] = False
-    simtemp: Annotated[int, Query(title="Simulated junction temperature, in ºC", ge=0, le=50)] = 23,
+    simtemp: Annotated[int, Query(title="Simulated junction temperature, in ºC", ge=0, le=50)] = 23
     tcoef: Annotated[float, Query(title="Real junction temperature coefficient", gt=-0.1, lt=0.1)] = 0.0002
     voff: Annotated[float, Query(title="Real junction voltage offset", gt=-0.1, lt=0.1)] = 0.05463
 

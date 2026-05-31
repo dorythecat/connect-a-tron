@@ -120,7 +120,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
         """
         Configures the time domain and all of its associated settings.
 
-        :param scale: The time scale of the oscilloscope, in seconds per division. (0.000000002 <= scale <= 100) (MUST bstart by 1, 2, or 5 (ie, 10ns, 50ms, but NOT 30ms, etc))
+        :param scale: The time scale of the oscilloscope, in seconds per division. (0.000000002 <= scale <= 100) (MUST start by 1, 2, or 5 (ie, 10ns, 50ms, but NOT 30ms, etc))
         :param offset: The offset of the oscilloscope from the trigger point, in seconds.
         :param mode: The display mode of the oscilloscope. ("MAIN", "XY", or "ROLL")
         :param window: Wether to enable or not the secondary window.
@@ -156,7 +156,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
         :param channel: The channel to configure. (1 or 2)
         :param on: Wether the channel should be on or off.
         :param scale: The vertical scale of the channel, in Volts per division. The range of the channel will be [-4 * scale, 4 * scale]. (0.001 * probe < scale <= 10 * probe)
-        :param offset: The vertical offset of the channel, in Volts. (-50 * probe <= offset <= 50 * probe)
+        :param offset: The vertical offset of the channel, in Volts. (abs(offset) <= 50 * probe)
         :param probe: The attenuation factor of the connected probe (1, 10, 50, or 100)
         :param invert: Wether to invert the channel or not.
         :param coupling: Coupling mode of the channel. ("AC", "DC", or "GND")
@@ -171,7 +171,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid probe value provided!")
         if not 0.001 < (scale / probe) <= 10:
             raise AttributeError("Invalid scale value provided!")
-        if not -50 <= (offset / probe) <= 50:
+        if abs(offset / probe) <= 50:
             raise AttributeError("Invalid offset value provided!")
         if coupling not in ["AC", "DC", "GND"]:
             raise AttributeError("Invalid coupling value provided!")
