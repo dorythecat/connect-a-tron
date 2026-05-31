@@ -171,7 +171,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid probe value provided!")
         if not 0.001 < (scale / probe) <= 10:
             raise AttributeError("Invalid scale value provided!")
-        if abs(offset / probe) <= 50:
+        if abs(offset / probe) > 50:
             raise AttributeError("Invalid offset value provided!")
         if coupling not in ["AC", "DC", "GND"]:
             raise AttributeError("Invalid coupling value provided!")
