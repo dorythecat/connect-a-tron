@@ -757,7 +757,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
         :param amp: Amplitude of the desired wave, in volts. (0.01 <= amp <= 7) (0 will turn the generator off)
         :param offset: Offset of the desired wave, in volts. (-3 <= offset <= 3)
         :param typ: Type of the desired wave. ("SINE", "SQUA", "RAMP", "EXP", "NOIS", "DC", "ARB1", "ARB2", "ARB3", "ARB4")
-        :param duty: Duty cycle of the desired wave, in percentage (0 <= duty <= 100)
+        :param duty: Duty cycle of the desired wave, in percentage (0 <= duty <= 99)
         :param mod: The type of modulation to apply to the signal ("NONE", "AM", or "FM")
         :param mod_typ: The type of signal to modulate with ("SINE", "SQUA", or "RAMP")
         :param mod_freq: The frequency to modulate with, in hertz (100 <= mod_freq <= 50000)
@@ -774,7 +774,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid offset value provided!")
         if typ not in ["SINE", "SQUA", "RAMP", "EXP", "NOIS", "DC", "ARB1", "ARB2", "ARB3", "ARB4"]:
             raise AttributeError("Invalid type value provided!")
-        if not 0 <= duty <= 100:
+        if not 0 <= duty <= 99:
             raise AttributeError("Invalid duty cycle value provided!")
         if mod not in ["NONE", "AM", "FM"]:
             raise AttributeError("Invalid modulation value provided!")
