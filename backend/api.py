@@ -77,22 +77,36 @@ class ThermocoupleType(Enum):
     K = "K"
     T = "T"
 
+class Keithley2000Measure(BaseModel):
+    typ: Annotated[int, Path(title="Type of measurement to take", ge=1, le=11)]
+    nplc: Annotated[float, Query(title="Number of powerline cycles per measurement", ge=0.01, le=10)] = 10
+    samples: Annotated[int, Query(title="Number of samples to average together", ge=1, le=100)] = 1
+    mov: Annotated[bool, Query(title="Wether to use a moving filter (True) or a repeat filter (False)")] = False
+    digits: Annotated[int, Query(title="Number of digits to display", ge=4, le=7)] = 7
+    thr: Annotated[int, Query(title="Threshold for continuity, in Ohms", ge=1, le= 1000)] = 10
+    bandwidth: Annotated[int, Query(title="Bandwidth for AC measurements, in Hertz", ge=3, le=300000)] = 30
+    ttype: Annotated[ThermocoupleType, Query(title="Type of thermocouple attached to the multimeter")] = ThermocoupleType.J
+    tref: Annotated[bool, Query(title="Wether to use a simulated (False) or real (True) thermocouple")] = False
+    simtemp: Annotated[int, Query(title="Simulated junction temperature, in ºC", ge=0, le=50)] = 23,
+    tcoef: Annotated[float, Query(title="Real junction temperature coefficient", gt=-0.1, lt=0.1)] = 0.0002
+    voff: Annotated[float, Query(title="Real junction voltage offset", gt=-0.1, lt=0.1)] = 0.05463
+
 @app.get("/dmm/keithley2000/measure/{typ}", tags=["DMM"])
-async def keithley2000_measure(
-        typ: Annotated[int, Path(title="Type of measurement to take", ge=1, le=11)],
-        nplc: Annotated[float, Query(title="Number of powerline cycles per measurement", ge=0.01, le=10)] = 10,
-        samples: Annotated[int, Query(title="Number of samples to average together", ge=1, le=100)] = 1,
-        mov: Annotated[bool, Query(title="Wether to use a moving filter (True) or a repeat filter (False)")] = False,
-        digits: Annotated[int, Query(title="Number of digits to display", ge=4, le=7)] = 7,
-        thr: Annotated[int, Query(title="Threshold for continuity, in Ohms", ge=1, le=1000)] = 10,
-        bandwidth: Annotated[int, Query(title="Bandwidth for AC measurements, in Hertz", ge=3, le=300000)] = 30,
-        ttype: Annotated[ThermocoupleType, Query(title="Type of thermocouple attached to the multimeter")] = ThermocoupleType.J,
-        tref: Annotated[bool, Query(title="Wether to use a simulated (False) or a real (True) thermocouple")] = False,
-        simtemp: Annotated[int, Query(title="Simulated junction temperature, in ºC", ge=0, le=50)] = 23,
-        tcoef: Annotated[float, Query(title="Real junction temperature coefficient", gt=-0.1, lt=0.1)] = 0.0002,
-        voff: Annotated[float, Query(title="Real junction voltage offset", gt=-0.1, lt=0.1)] = 0.05463
-    ) -> float:
-    keithley2000.measure_set(dmm.MType(typ), nplc, samples, mov, digits, thr, bandwidth, ttype.value, tref, simtemp, tcoef, voff)
+async def keithley2000_measure(data: Keithley2000Measure = Depends()) -> float:
+    keithley2000.measure_set(
+            dmm.MType(data.typ),
+            data.nplc,
+            data.samples,
+            data.mov,
+            data.digits,
+            data.thr,
+            data.bandwidth,
+            data.ttype.value,
+            data.tref,
+            data.simtemp,
+            data.tcoef,
+            data.voff
+        )
     return keithley2000.measure_get()
 
 @app.get("/dmm/keithley2000/input", tags=["DMM"])
