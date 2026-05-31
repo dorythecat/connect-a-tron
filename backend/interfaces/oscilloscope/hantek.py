@@ -48,6 +48,9 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
+        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
+        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
         return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? FREQ')
 
     def period(self, channel: int = 1) -> float:
@@ -62,6 +65,9 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
+        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
+        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
         return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? PERIOD')
 
     def rms(self, channel: int = 1) -> float:
@@ -76,6 +82,9 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
+        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
+        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
         return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? RMS')
 
     def ppk(self, channel: int = 1) -> float:
@@ -90,6 +99,9 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
+        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
+        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
         return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? VPP')
 
     def force_trigger(self) -> None:
@@ -224,6 +236,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
         :param level: Trigger level, in Volts. (abs(level) <= 4 * vert_scale) (see channel_conf)
         :param polarity: Polarity of the pulse trigger. True is positive, False is negative.
         :param width: Pulse width to compare against, in seconds. (0.000000008 <= width <= 10)
+n hantek_testing.py
         :param when: How to compare the width of the received pulse to the width value provided. ("EQUA", "NEQU", "GREA", or "LESS") (~5% error on comparison)
 
         :returns: Nothing.
@@ -461,6 +474,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
         self._scpi_send(f':TRIG:TV:SOUR CHAN{source}')
         self._scpi_send(f':TRIG:TV:POL {'POSI' if polarity else 'NEGA'}')
         self._scpi_send(f':TRIG:TV:MODE {mode}')
+n hantek_testing.py
         self._scpi_send(f':TRIG:TV:STAN {standard}')
         self._scpi_send(f':TRIG:VID:LEV {level}')
         if mode == "LINE":
