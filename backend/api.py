@@ -215,3 +215,31 @@ def hantek_dso2d15_set_waveform(data: HantekDSO2D15SetWaveform = Depends()) -> N
     hantek_dso2d15.set_waveform(
         data.freq, data.amp, data.offset, data.typ, data.duty, data.mod, data.mod_type, data.mod_freq, data.mod_depth
     )
+
+@app.get("/oscilloscope/hantek_dso2d15/keypad_lock", tags=["Oscilloscope"])
+def hantek_dso2d15_keypad_lock_get() -> bool:
+    return hantek_dso2d15.keypad_lock
+
+@app.post("/oscilloscope/hantek_dso2d15/keypad_lock", tags=["Oscilloscope"])
+def hantek_dso2d15_keypad_lock_set(value: bool = True) -> None:
+    hantek_dso2d15.keypad_lock = value
+
+@app.get("/oscilloscope/hantek_dso2d15/trigger_status", tags=["Oscilloscope"])
+def hantek_dso2d15_trigger_status() -> bool:
+    return hantek_dso2d15.trigger_status
+
+@app.get("/oscilloscope/hantek_dso2d15/frequency", tags=["Oscilloscope"])
+def hantek_dso2d15_frequency(channel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    return hantek_dso2d15.frequency(channel)
+
+@app.get("/oscilloscope/hantek_dso2d15/period", tags=["Oscilloscope"])
+def hantek_dso2d15_period(chanel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    return hantek_dso2d15.period(channel)
+
+@app.get("/oscilloscope/hantek_dso2d15/rms", tags=["Oscilloscope"])
+def hantek_dso2d15_rms(channel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    return hantek_dso2d15.rms(channel)
+
+@app.get("/oscilloscope/hantek_dso2d15/ppk", tags=["Oscilloscope"])
+def hantek_dso2d15_ppk(channel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    return hantek_dso2d15.ppk(channel)
