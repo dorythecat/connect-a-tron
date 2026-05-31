@@ -10,15 +10,19 @@ class DSO2D15(oscilloscope.Oscilloscope):
     # Helper functions for the serial connection
     # These don't have any protections or description because they're only meant for internal use
     def _scpi_send(self, command: str) -> None:
-        self._conn.write(f'{command}\n'.encode())
+        self._conn.write(f'{command}'.encode('unicode_escape'))
 
-    def _scpi_get_str(self, command: str, max_size: int = 8) -> str:
-        self._conn.write(f'{command}\n'.encode())
-        return self._conn.read(max_size).decode()
+    def _scpi_get_bytes(self, command: str, size: int = 4096) -> bytes:
+        self._conn.write(command.encode('unicode_escape'))
+        return self._conn.read(size)
 
-    def _scpi_get_float(self, command: str, max_size: int = 16) -> float:
-        self._conn.write(f'{command}\n'.encode())
-        return float(self._conn.read(max_size).decode())
+    def _scpi_get_str(self, command: str, size: int = 8) -> str:
+        self._conn.write(command.encode('unicode_escape'))
+        return self._conn.read(size).decode('unicode_escape')
+
+    def _scpi_get_float(self, command: str, size: int = 16) -> float:
+        self._conn.write(command.encode('unicode_escape'))
+        return float(self._conn.read(size).decode('unicode_escape'))
 
     @property
     def keypad_lock(self) -> bool:
@@ -75,7 +79,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
         return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? RMS')
 
     def ppk(self, channel: int = 1) -> float:
-        """
+        """https://www.youtube.com/watch?v=oqOlrGPgng8
         Get the RMS voltage of the waveform currently being read by the oscilloscope on the specified channel.
 
         :param channel: The channel to read data from. (1 or 2)
@@ -185,7 +189,6 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid mode value provided!")
         if not 0.000000016 <= holdoff <= 10:
             raise AttributeError("Invalid holdoff value provided!")
-
         self._scpi_send(f':TRIG:SWE {mode}')
         self._scpi_send(f':TRIG:HOLD {holdoff}')
 
@@ -319,7 +322,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
         :param source: Channel to use as source of the signal to trigger with. (1 or 2)
         :param upper_level: Upper trigger level, in Volts. (abs(upper_level) <= 4 * vert_scale) (see channel_conf)
         :param lower_level: Lower trigger level, in Volts. (abs(lower_level) <= 4 * vert_scale) (see channel_conf)
-        :param polarity: Polarity of the trigger. True is positive, False is negative.
+        :param polarity: Polarity of the trigger. True is positivhttps://www.youtube.com/watch?v=oqOlrGPgng8e, False is negative.
         :param time: Time to compare against, in seconds. (0.000000008 <= time <= 10)
         :param when:: How to compare the time value provided againt the signal. ("EQUA", "NEQU", "GREA", or "LESS")
 
@@ -708,14 +711,14 @@ class DSO2D15(oscilloscope.Oscilloscope):
             self._scpi_send(f':ACQ:COUN {samples}')
 
         data: str = self._scpi_get_str(':WAV:DATA:ALL?', 128) # Query header
-        if data[:2] != b'#9':
+        if data[:2] != "#9":
             raise RuntimeError("Response header is corrupted or invalid!")
         offset = float(data[31:35])
         voltage = float(data[47:53])
         counter = points
         out: list[float] = []
         while counter > 0: 
-            data: str = self._scpi_get_str(':WAV:DATA:ALL?', 4096)
+            data: str = self._scpi_get_bytes(':WAV:DATA:ALL?')
             if data[:2] != b'#9':
                 raise RuntimeError("Response header is corrupted or invalid!")
             for i in range(29, len(data)):
