@@ -715,17 +715,22 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise RuntimeError("Response header is corrupted or invalid!")
         offset = float(data[31:35])
         voltage = float(data[47:53])
-        counter = points
+        counter = int(data[11:20]) - int(data[2:11]) # Total size of the packages to receive, minus this package
+        channel_counter = points
         out: list[float] = []
-        while counter > 0: 
-            data: str = self._scpi_get_bytes(':WAV:DATA:ALL?')
+        while counter > 0:
+            data: str = self._scpi_get_bytes(':WAV:DATA:ALL?', 4029)
             if data[:2] != b'#9':
                 raise RuntimeError("Response header is corrupted or invalid!")
+            packet_size = int(data[2:11])
+            counter -= packet_size
+            if channel_counter < 0:
+                continue # Don't read channel 2 data
             for i in range(29, len(data)):
                 val = int(data[i])
                 val = val if val <= 127 else val - 256 # Handle negative numbers
                 out.append((val - offset) * voltage)
-            counter -= 4096
+            channel_counter -= packet_size
         return out
 
     def set_waveform(self, freq: float = 1000, amp: float = 1, offset: float = 0, typ: str = "SINE", duty: int = 50, mod: str = "NONE", mod_typ: str = "SINE", mod_freq: int = 1000, mod_depth: int = 100) -> None:
