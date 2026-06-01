@@ -1,0 +1,11 @@
+{
+  "keithley2000": {
+    "enabled": false,
+    "port": "/dev/ttyUSB0",
+    "baud_rate": 9600
+  },
+  "hantek_dso2d15": {
+    "enabled": true,
+    "port": "/dev/usbtmc0"
+  }
+}

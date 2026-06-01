@@ -28,3 +28,8 @@ The Hantek DSO2C10 I have modified to be a DSO2D15 is a 150MHz, 1GSa/s, 2-channe
 
 ## Joint measurements
 There is also the very inviting offer of doing some "joint measurements", that is to say, using various tools in a coordinated manner to compare measurements, carry out calibrations using one of the tools as a reference, or other similar endeavours.
+
+# Settings format
+There is (currently) one settings file, which you can find as `backend/settings.json`. This file contains definitions for the settings of what devices are available internally. That is, the devices that are physically connected to the device that is running the backend.
+
+Every device supported is included on the file. You can deactivate any of these devices by either removing that section, or setting the value of their `enabled` value to `false`. All devices have the `port` setting, which indicates which port of the machine the device is connected to.

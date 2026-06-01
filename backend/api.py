@@ -1,3 +1,5 @@
+import json
+
 from fastapi import FastAPI, Path, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, BeforeValidator, model_validator
@@ -47,26 +49,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# TODO: Load instrumets from a configuration file
-#keithley2000 = keithley.Keithley2000()
-keithley2000 = None
-hantek_dso2d15 = hantek.DSO2D15()
+with open("settings.json", "r") as f:
+    settings = json.load(f)
+
+if "keithley2000" in settings and "enabled" in settings["keithley2000"] and settings["keithley2000"]["enabled"]:
+    port = settings["keithley2000"]["port"] if "port" in settings["keithley2000"] else "/dev/ttyUSB0"
+    baud_rate = settings["keithley2000"]["baud_rate"] if "baud_rate" in settings["keithley2000"] else 9600
+    keithley2000 = keithley.Keithley2000(port, baud_rate)
+else:
+    keithley2000 = None
+
+if "hantek_dso2d15" in settings and "enabled" in settings["hantek_dso2d15"] and settings["hantek_dso2d15"]["enabled"]:
+    port = settings["hantek_dso2d15"]["port"] if "port" in settings["hantek_dso2d15"] else "/dev/usbtmc0"
+    hantek_dso2d15 = hantek.DSO2D15(port)
+else:
+    hantek_dso2d15 = None
 
 @app.get("/system/interfaces", tags=["System"])
 async def interfaces() -> dict:
     """
-    Displayself._scpi_send(':MEAS:ENAB 1') # Enable measurement
-        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
-        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurementss the available interfaces on this API.
+    Display the available interfaces on this API.
     """
-    return {
-            "dmm": [
-                "keithley2000"
-            ],
-            "oscilloscope": [
-                "hantek_dso2d15"
-            ]
+    interfaces = {
+        "dmm": [],
+        "oscilloscope": []
     }
+    if keithley2000 is not None:
+        interfaces["dmm"].append("keithley2000")
+    if hantek_dso2d15 is not None:
+        interfaces["oscilloscope"].append("hantek_dso2d15")
+    return interfaces
 
 # Keithley 2000
 @app.get("/dmm/keithley2000", tags=["DMM"])
