@@ -1,3 +1,21 @@
+<?php
+$url = "http://127.0.0.1:8000/system/interfaces";
+
+$headers = array(
+  'Accept: application/json'
+);
+
+$context = stream_context_create([
+  'http' => [
+    'header' => $headers
+  ]
+]);
+
+$response = (array) json_decode(file_get_contents($url, false, $context));
+
+$keithley2000_enable = in_array("keithley2000", $response["dmm"]);
+$hantek_dso2d15_enable = in_array("hantek_dso2d15", $response["oscilloscope"]);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
