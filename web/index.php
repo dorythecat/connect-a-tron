@@ -11,10 +11,17 @@ $context = stream_context_create([
   ]
 ]);
 
-$response = (array) json_decode(file_get_contents($url, false, $context));
+try {
+  $response = (array) json_decode(file_get_contents($url, false, $context));
 
-$keithley2000_enable = in_array("keithley2000", $response["dmm"]);
-$hantek_dso2d15_enable = in_array("hantek_dso2d15", $response["oscilloscope"]);
+  if (!$response) throw new Exception("Could not fetch data from API!");
+
+  $keithley2000_enable = in_array("keithley2000", $response["dmm"]);
+  $hantek_dso2d15_enable = in_array("hantek_dso2d15", $response["oscilloscope"]);
+} catch (Exception $e) {
+  echo 'Exception found when loading webpage: ', $e->getMessage();
+  exit(1);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +38,10 @@ $hantek_dso2d15_enable = in_array("hantek_dso2d15", $response["oscilloscope"]);
 <div id="page_title"><h1>CONNECT-A-TRON</h1></div>
 
 <div id="instruments">
-  <div class="instrument" id="keithley2000">
+<?php
+if ($keithley2000_enable) echo '<div class="instrument" id="keithley2000">';
+else echo '<div class="instrument" style="display: none" id="keithley2000">';
+?>
     <div class="name"><h2>Keithley 2000</h2></div>
     <div class="result" id="result_keithley2000">
       <a>-</a><a>-</a><a>-</a><a>-.</a><a>-</a><a>-</a><a>-</a><a></a><a>V</a><a>D</a><a>C</a>
