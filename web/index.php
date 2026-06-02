@@ -509,15 +509,15 @@ document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
     ctx.lineCap = 'butt';
 
     // Horizontal lines
-    for (let i = 1; i < 8; i++) {
-      ctx.moveTo(0, 60 * i);
-      ctx.lineTo(800, 60 * i);
+    for (let i = 1; i < 480; i += 60) {
+      ctx.moveTo(0, i);
+      ctx.lineTo(800, i);
     }
 
     // Vertical lines
-    for (let i = -7; i < 8; i++) {
-      ctx.moveTo(50 * i + 400, 0);
-      ctx.lineTo(50 * i + 400, 480);
+    for (let i = -350; i < 400; i += 50) {
+      ctx.moveTo(i + 400, 0);
+      ctx.lineTo(i + 400, 480);
     }
     ctx.stroke();
 
