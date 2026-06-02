@@ -162,8 +162,10 @@ else echo '<div class="instrument" style="display: none" id="keithley2000">';
 </body>
 
 <script>
-const murl = 'http://127.0.0.1:8000/dmm/keithley2000/measure/'; // Measurement URL
-const burl = 'http://127.0.0.1:8000/dmm/keithley2000/key_press'// Button URL
+// TODO: Use PHP to not send the code for unused devices, as to make page load and resource usage more optimal
+
+const murl_keithley2000 = 'http://127.0.0.1:8000/dmm/keithley2000/measure/'; // Keithley 2000 measurement URL
+const burl_keithley2000 = 'http://127.0.0.1:8000/dmm/keithley2000/key_press'// Keithley 2000 key press URL
 
 const result_keithley2000 = document.getElementById('result_keithley2000');
 const measure_type_keithley2000 = document.getElementById('measure_type_keithley2000');
@@ -230,7 +232,7 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
   let html = '';
   for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit === 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
-  fetch(`${murl}${mtype}?nplc=${nplc}&samples=${fsamples}&mov=${ftype}&thr=${thr}&bandwidth=${bandwidth}&ttype=${ttype}&tref=${tref}&simtemp=${simtemp}&tcoef=${tcoef}&voff=${voff}`).then(function(response) {
+  fetch(`${murl_keithley2000}${mtype}?nplc=${nplc}&samples=${fsamples}&mov=${ftype}&thr=${thr}&bandwidth=${bandwidth}&ttype=${ttype}&tref=${tref}&simtemp=${simtemp}&tcoef=${tcoef}&voff=${voff}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     data = parseFloat(data);
@@ -355,119 +357,119 @@ measure_temp_voff_number_keithley2000.addEventListener('input', () => {
 
 // Front panel buttons
 document.getElementById("shift_key_keithley2000").onclick = () => {
-  fetch(`${burl}?key=1`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=1`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("dcv_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=2`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000path html}?key=2`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("acv_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=3`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=3`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("dci_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=4`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=4`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("aci_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=5`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=5`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("r2_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=6`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=6`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("r4_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=7`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=7`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("freq_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=8`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=8`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("temp_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=16`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=16`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("range_up_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=11`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=11`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("local_key_keithley2000").onclick = () => {
-  fetch(`${burl}?key=17`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=17`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("ex_trig_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=18`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=18`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("trig_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=19`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=19`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("store_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=20`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=20`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("recall_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=21`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=21`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("filter_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=22`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=22`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("rel_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=23`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=23`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("left_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=24`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=24`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("right_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=15`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=15`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("auto_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=12`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=12`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("open_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=26`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=26`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("close_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=27`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=27`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("step_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=28`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=28`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("scan_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=29`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=29`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("digits_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=30`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=30`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("rate_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=31`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=31`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("exit_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=32`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=32`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("enter_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=14`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=14`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("range_down_button_keithley2000").onclick = () => {
-  fetch(`${burl}?key=13`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=13`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 </script>
 </html>
