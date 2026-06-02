@@ -158,6 +158,19 @@ else echo '<div class="instrument" style="display: none" id="keithley2000">';
       </div>
     </div>
   </div>
+
+<?php
+if ($hantek_dso2d15_enable) echo '<div class="instrument" id="hantek_dso2d15">';
+else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
+?>
+    <div class="name"><h2>Hantek DSO2D15</h2></div>
+    <div class="result" id="result_hantek_dso2d15">
+      <canvas id="waveform_hantek_dso2d15" width="800" height="480"></canvas>
+    </div>
+    <div class="settings">
+      <button class="measure_button" id="measure_button_hantek_dso2d15">Measure</button>
+    </div>
+  </div>
 </div>
 </body>
 
@@ -361,7 +374,7 @@ document.getElementById("shift_key_keithley2000").onclick = () => {
 }
 
 document.getElementById("dcv_button_keithley2000").onclick = () => {
-  fetch(`${burl_keithley2000path html}?key=2`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+  fetch(`${burl_keithley2000}?key=2`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
 document.getElementById("acv_button_keithley2000").onclick = () => {
@@ -470,6 +483,60 @@ document.getElementById("enter_button_keithley2000").onclick = () => {
 
 document.getElementById("range_down_button_keithley2000").onclick = () => {
   fetch(`${burl_keithley2000}?key=13`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
+}
+
+const murl_hantek_dso2d15 = 'http://127.0.0.1:8000/oscilloscope/hantek_dso2d15/waveform';
+
+const result_hantek_dso2d15 = document.getElementById('result_hantek_dso2d15');
+const waveform_hantek_dso2d15 = document.getElementById('waveform_hantek_dso2d15');
+
+// The display is not 100% faithful, but I personally refuse to measure pixels just to make it so. If you have a complaint, well, it's FOSS for a reason...
+document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
+  fetch(`${murl_hantek_dso2d15}`).then(function(response) {
+    return response.json();
+  }).then(function(data) {
+    // Useful variables for rendering
+    const yScale = 500; // 1 V / division (should adjust to selected scale once that's implemented)
+
+    const ctx = waveform_hantek_dso2d15.getContext('2d');
+    ctx.clearRect(0, 0, 800, 480);
+
+    // Draw the grid (TODO: Make this also run on reloading the page)
+    ctx.beginPath();
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 1;
+    ctx.lineJoin = 'miter';
+    ctx.lineCap = 'butt';
+
+    // Horizontal lines
+    for (let i = 1; i < 8; i++) {
+      ctx.moveTo(0, 60 * i);
+      ctx.lineTo(800, 60 * i);
+    }
+
+    // Vertical lines
+    for (let i = -7; i < 8; i++) {
+      ctx.moveTo(50 * i + 400, 0);
+      ctx.lineTo(50 * i + 400, 480);
+    }
+    ctx.stroke();
+
+    // Generate the actual waveform
+    ctx.beginPath();
+    ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    let y = 240 - (data[0] * yScale);
+    ctx.moveTo(0, y);
+    // We only need to sample every fifth point, since that's the canvas resolution we have
+    for (let i = 1; i < 800; i++) {
+      y = 240 - (data[i * 5] * yScale);
+      ctx.lineTo(i, y);
+    }
+    ctx.stroke();
+  }).catch(function(err) { console.error(`Fetch error: ${err}`); });
 }
 </script>
 </html>
