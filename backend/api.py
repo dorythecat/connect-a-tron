@@ -183,7 +183,9 @@ class HantekDSO2D15GetWaveform(BaseModel):
     @model_validator(mode='after')
     def verify(self) -> Self:
         if not 0.001 < (self.volt_scale / self.probe) <= 10:
-            raise ValueError("Vertical scale out of bounds!")
+            if 0.001 != self.volt_scale / self.probe:
+                raise ValueError("Vertical scale out of bounds!")
+            self.volt_scale = 0.00101 # Make it 1mV without making it 1mV, so that the oscilloscope understands it
         if abs(self.volt_offset) > 50 * self.probe:
             raise ValueError("Vertical offset out of bounds!")
         if abs(self.trigger_level) > 4 * self.volt_scale:
