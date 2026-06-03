@@ -514,7 +514,6 @@ const volt_scale_slider_hantek_dso2d15 = document.getElementById('volt_scale_sli
 document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
   let probe = probe_value_hantek_dso2d15.value;
   let volt_scale = volt_scale_number_hantek_dso2d15.value;
-  if (volt_scale === 0.001) volt_scale = 0.0011;
   fetch(`${murl_hantek_dso2d15}?probe=${probe}&volt_scale=${volt_scale}`).then(function(response) {
     return response.json();
   }).then(function(data) {
