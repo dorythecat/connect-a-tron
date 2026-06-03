@@ -169,6 +169,20 @@ else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
     </div>
     <div class="settings">
       <button class="measure_button" id="measure_button_hantek_dso2d15">Measure</button>
+      <div class="measure_option" id="probe_hantek_dso2d15">
+        <h3 class="measure_option_label">Probe attenuation</h3>
+        <select class="measure_type" id="probe_value_hantek_dso2d15">
+          <option value="1">1x</option>
+          <option value="10">10x</option>
+          <option value="50">50x</option>
+          <option value="100">100x</option>
+        </select>
+      </div>
+      <div class="measure_option" id="volt_scale_hantek_dso2d15">
+        <h3 class="measure_option_label">Volts per division</h3>
+        <input class="measure_option_number" id="volt_scale_number_hantek_dso2d15" type="number" min="0.001" max="10" value="1"/><!--TODO: Make this autoscale with the probe value-->
+        <input class="measure_option_slider" id="volt_scale_slider_hantek_dso2d15" type="range" min="0.001" max="10" value="1" step="0.001"/>
+      </div>
     </div>
   </div>
 </div>
@@ -490,9 +504,18 @@ const murl_hantek_dso2d15 = 'http://127.0.0.1:8000/oscilloscope/hantek_dso2d15/w
 const result_hantek_dso2d15 = document.getElementById('result_hantek_dso2d15');
 const waveform_hantek_dso2d15 = document.getElementById('waveform_hantek_dso2d15');
 
+const probe_value_hantek_dso2d15 = document.getElementById('probe_value_hantek_dso2d15');
+
+let min_volt_scale_hantek_dso2d15 = 0.001, max_volt_scale_hantek_dso2d15 = 10;
+const volt_scale_number_hantek_dso2d15 = document.getElementById('volt_scale_number_hantek_dso2d15');
+const volt_scale_slider_hantek_dso2d15 = document.getElementById('volt_scale_slider_hantek_dso2d15');
+
 // The display is not 100% faithful, but I personally refuse to measure pixels just to make it so. If you have a complaint, well, it's FOSS for a reason...
 document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
-  fetch(`${murl_hantek_dso2d15}`).then(function(response) {
+  let probe = probe_value_hantek_dso2d15.value;
+  let volt_scale = volt_scale_number_hantek_dso2d15.value;
+  if (volt_scale === 0.001) volt_scale = 0.0011;
+  fetch(`${murl_hantek_dso2d15}?probe=${probe}&volt_scale=${volt_scale}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     // Useful variables for rendering
@@ -538,5 +561,25 @@ document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
     ctx.stroke();
   }).catch(function(err) { console.error(`Fetch error: ${err}`); });
 }
+
+probe_value_hantek_dso2d15.addEventListener('input', () => {
+  const probe = probe_value_hantek_dso2d15.value;
+  volt_scale_number_hantek_dso2d15.min = probe * 0.001;
+  volt_scale_number_hantek_dso2d15.max = probe * 10;
+  volt_scale_slider_hantek_dso2d15.min = probe * 0.001;
+  volt_scale_slider_hantek_dso2d15.max = probe * 10;
+  min_volt_scale_hantek_dso2d15 = probe * 0.001;
+  max_volt_scale_hantek_dso2d15 = probe * 10;
+});
+
+volt_scale_slider_hantek_dso2d15.addEventListener('input', () => {
+  volt_scale_number_hantek_dso2d15.value = volt_scale_slider_hantek_dso2d15.value;
+});
+
+volt_scale_number_hantek_dso2d15.addEventListener('input', () => {
+  volt_scale_number_hantek_dso2d15.value = Math.max(min_volt_scale_hantek_dso2d15, Math.min(max_volt_scale_hantek_dso2d15, volt_scale_number_hantek_dso2d15.value));
+  volt_scale_slider_hantek_dso2d15.value = volt_scale_number_hantek_dso2d15.value;
+});
+
 </script>
 </html>
