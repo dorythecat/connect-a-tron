@@ -180,8 +180,13 @@ else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
       </div>
       <div class="measure_option" id="volt_scale_hantek_dso2d15">
         <h3 class="measure_option_label">Volts per division</h3>
-        <input class="measure_option_number" id="volt_scale_number_hantek_dso2d15" type="number" min="0.001" max="10" value="1"/><!--TODO: Make this autoscale with the probe value-->
+        <input class="measure_option_number" id="volt_scale_number_hantek_dso2d15" type="number" min="0.001" max="10" value="1"/>
         <input class="measure_option_slider" id="volt_scale_slider_hantek_dso2d15" type="range" min="0.001" max="10" value="1" step="0.001"/>
+      </div>
+      <div class="measure_option" id="volt_offset_hantek_dso2d15">
+        <h3 class="measure_option_label">Voltage offset</h3>
+        <input class="measure_option_number" id="volt_offset_number_hantek_dso2d15" type="number" min="-50" max="50" value="0"/>
+        <input class="measure_option_slider" id="volt_offset_slider_hantek_dso2d15" type="range" min="-50" max="50" value="0" step="0.01"/>
       </div>
     </div>
   </div>
@@ -191,6 +196,7 @@ else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
 <script>
 // TODO: Use PHP to not send the code for unused devices, as to make page load and resource usage more optimal
 
+// Keithley 2000
 const murl_keithley2000 = 'http://127.0.0.1:8000/dmm/keithley2000/measure/'; // Keithley 2000 measurement URL
 const burl_keithley2000 = 'http://127.0.0.1:8000/dmm/keithley2000/key_press'// Keithley 2000 key press URL
 
@@ -296,12 +302,10 @@ measure_type_keithley2000.addEventListener('change', () => { // This thing could
     div_temp_main_keithley2000.style = 'display: block';
     if (measure_temp_ref_keithley2000.value === '0') {
       div_temp_sim_keithley2000.style = 'display: block';
-      div_temp_coef_keithley2000.style = 'display: none';
-      div_temp_voff_keithley2000.style = 'display: none';
+      div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: none';
     } else {
       div_temp_sim_keithley2000.style = 'display: none';
-      div_temp_coef_keithley2000.style = 'display: block';
-      div_temp_voff_keithley2000.style = 'display: block';
+      div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: block';
     }
   } else div_temp_main_keithley2000.style = 'display: none';
 });
@@ -309,12 +313,10 @@ measure_type_keithley2000.addEventListener('change', () => { // This thing could
 measure_temp_ref_keithley2000.addEventListener('change', () => {
   if (measure_temp_ref_keithley2000.value === '0') {
     div_temp_sim_keithley2000.style = 'display: block';
-    div_temp_coef_keithley2000.style = 'display: none';
-    div_temp_voff_keithley2000.style = 'display: none';
+    div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: none';
   } else {
     div_temp_sim_keithley2000.style = 'display: none';
-    div_temp_coef_keithley2000.style = 'display: block';
-    div_temp_voff_keithley2000.style = 'display: block';
+    div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: block';
   } 
 });
 
@@ -324,8 +326,7 @@ measure_samples_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_samples_number_keithley2000.addEventListener('input', () => {
-  measure_samples_number_keithley2000.value = Math.max(1, Math.min(100, measure_samples_number_keithley2000.value));
-  measure_samples_slider_keithley2000.value = measure_samples_number_keithley2000.value;
+  measure_samples_slider_keithley2000.value = measure_samples_number_keithley2000.value = Math.max(1, Math.min(100, measure_samples_number_keithley2000.value));
 });
 
 measure_nplc_slider_keithley2000.addEventListener('input', () => {
@@ -333,8 +334,7 @@ measure_nplc_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_nplc_number_keithley2000.addEventListener('input', () => {
-  measure_nplc_number_keithley2000.value = Math.max(0.01, Math.min(10, measure_nplc_number_keithley2000.value));
-  measure_nplc_slider_keithley2000.value = measure_nplc_number_keithley2000.value;
+  measure_nplc_slider_keithley2000.value = measure_nplc_number_keithley2000.value = Math.max(0.01, Math.min(10, measure_nplc_number_keithley2000.value));
 });
 
 measure_threshold_slider_keithley2000.addEventListener('input', () => {
@@ -342,8 +342,7 @@ measure_threshold_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_threshold_number_keithley2000.addEventListener('input', () => {
-  measure_threshold_number_keithley2000.value = Math.max(1, Math.min(1000, measure_threshold_number_keithley2000.value));
-  measure_threshold_slider_keithley2000.value = measure_threshold_number_keithley2000.value;
+  measure_threshold_slider_keithley2000.value = measure_threshold_number_keithley2000.value = Math.max(1, Math.min(1000, measure_threshold_number_keithley2000.value));
 });
 
 measure_bandwidth_slider_keithley2000.addEventListener('input', () => {
@@ -351,8 +350,7 @@ measure_bandwidth_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_bandwidth_number_keithley2000.addEventListener('input', () => {
-  measure_bandwidth_number_keithley2000.value = Math.max(3, Math.min(300000, measure_bandwidth_number_keithley2000.value));
-  measure_bandwidth_slider_keithley2000.value = measure_bandwidth_number_keithley2000.value;
+  measure_bandwidth_slider_keithley2000.value = measure_bandwidth_number_keithley2000.value = Math.max(3, Math.min(300000, measure_bandwidth_number_keithley2000.value));
 });
 
 measure_temp_sim_slider_keithley2000.addEventListener('input', () => {
@@ -360,8 +358,7 @@ measure_temp_sim_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_temp_sim_number_keithley2000.addEventListener('input', () => {
-  measure_temp_sim_number_keithley2000.value = Math.max(0, Math.min(50, measure_temp_sim_number_keithley2000.value));
-  measure_temp_sim_slider_keithley2000.value = measure_temp_sim_number_keithley2000.value;
+  measure_temp_sim_slider_keithley2000.value = measure_temp_sim_number_keithley2000.value = Math.max(0, Math.min(50, measure_temp_sim_number_keithley2000.value));
 });
 
 measure_temp_coef_slider_keithley2000.addEventListener('input', () => {
@@ -369,8 +366,7 @@ measure_temp_coef_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_temp_coef_number_keithley2000.addEventListener('input', () => {
-  measure_temp_coef_number_keithley2000.value = Math.max(-0.0999, Math.min(0.0999, measure_temp_coef_number_keithley2000.value));
-  measure_temp_coef_slider_keithley2000.value = measure_temp_coef_number_keithley2000.value;
+  measure_temp_coef_slider_keithley2000.value = measure_temp_coef_number_keithley2000.value = Math.max(-0.0999, Math.min(0.0999, measure_temp_coef_number_keithley2000.value));
 });
 
 measure_temp_voff_slider_keithley2000.addEventListener('input', () => {
@@ -378,8 +374,7 @@ measure_temp_voff_slider_keithley2000.addEventListener('input', () => {
 });
 
 measure_temp_voff_number_keithley2000.addEventListener('input', () => {
-  measure_temp_voff_number_keithley2000.value = Math.max(-0.0999, Math.min(0.0999, measure_temp_voff_number_keithley2000.value));
-  measure_temp_voff_slider_keithley2000.value = measure_temp_voff_number_keithley2000.value;
+  measure_temp_voff_slider_keithley2000.value = measure_temp_voff_number_keithley2000.value = Math.max(-0.0999, Math.min(0.0999, measure_temp_voff_number_keithley2000.value));
 });
 
 // Front panel buttons
@@ -499,6 +494,7 @@ document.getElementById("range_down_button_keithley2000").onclick = () => {
   fetch(`${burl_keithley2000}?key=13`, { method: "POST" }).catch(function(err) { console.error(`Button press error: ${err}`); });
 }
 
+// Hantek DSO2D15
 const murl_hantek_dso2d15 = 'http://127.0.0.1:8000/oscilloscope/hantek_dso2d15/waveform';
 
 const result_hantek_dso2d15 = document.getElementById('result_hantek_dso2d15');
@@ -506,9 +502,11 @@ const waveform_hantek_dso2d15 = document.getElementById('waveform_hantek_dso2d15
 
 const probe_value_hantek_dso2d15 = document.getElementById('probe_value_hantek_dso2d15');
 
-let min_volt_scale_hantek_dso2d15 = 0.001, max_volt_scale_hantek_dso2d15 = 10;
 const volt_scale_number_hantek_dso2d15 = document.getElementById('volt_scale_number_hantek_dso2d15');
 const volt_scale_slider_hantek_dso2d15 = document.getElementById('volt_scale_slider_hantek_dso2d15');
+
+const volt_offset_number_hantek_dso2d15 = document.getElementById('volt_offset_number_hantek_dso2d15');
+const volt_offset_slider_hantek_dso2d15 = document.getElementById('volt_offset_slider_hantek_dso2d15');
 
 // The display is not 100% faithful, but I personally refuse to measure pixels just to make it so. If you have a complaint, well, it's FOSS for a reason...
 document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
@@ -562,13 +560,14 @@ document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
 }
 
 probe_value_hantek_dso2d15.addEventListener('input', () => {
+  // TODO: Make step sizes also change
   const probe = probe_value_hantek_dso2d15.value;
-  volt_scale_number_hantek_dso2d15.min = probe * 0.001;
-  volt_scale_number_hantek_dso2d15.max = probe * 10;
-  volt_scale_slider_hantek_dso2d15.min = probe * 0.001;
-  volt_scale_slider_hantek_dso2d15.max = probe * 10;
-  min_volt_scale_hantek_dso2d15 = probe * 0.001;
-  max_volt_scale_hantek_dso2d15 = probe * 10;
+
+  volt_scale_slider_hantek_dso2d15.min = volt_scale_number_hantek_dso2d15.min = 0.001 * probe;
+  volt_scale_slider_hantek_dso2d15.max = volt_scale_number_hantek_dso2d15.max = 10 * probe;
+
+  volt_offset_slider_hantek_dso2d15.min = volt_offset_number_hantek_dso2d15.min = -50 * probe;
+  volt_offset_slider_hantek_dso2d15.max = volt_offset_number_hantek_dso2d15.max = 50 * probe;
 });
 
 volt_scale_slider_hantek_dso2d15.addEventListener('input', () => {
@@ -576,8 +575,15 @@ volt_scale_slider_hantek_dso2d15.addEventListener('input', () => {
 });
 
 volt_scale_number_hantek_dso2d15.addEventListener('input', () => {
-  volt_scale_number_hantek_dso2d15.value = Math.max(min_volt_scale_hantek_dso2d15, Math.min(max_volt_scale_hantek_dso2d15, volt_scale_number_hantek_dso2d15.value));
-  volt_scale_slider_hantek_dso2d15.value = volt_scale_number_hantek_dso2d15.value;
+  volt_scale_slider_hantek_dso2d15.value = volt_scale_number_hantek_dso2d15.value = Math.max(volt_scale_number_hantek_dso2d15.min, Math.min(volt_scale_number_hantek_dso2d15.max, volt_scale_number_hantek_dso2d15.value));
+});
+
+volt_offset_slider_hantek_dso2d15.addEventListener('input', () => {
+  volt_offset_number_hantek_dso2d15.value = volt_offset_slider_hantek_dso2d15.value;
+});
+
+volt_offset_number_hantek_dso2d15.addEventListener('input', () => {
+  volt_offset_slider_hantek_dso2d15.value = volt_offset_number_hantek_dso2d15.value = Math.max(volt_offset_number_hantek_dso2d15.min, Math.min(volt_offset_number_hantek_dso2d15.max, volt_offset_number_hantek_dso2d15.value));
 });
 
 </script>
