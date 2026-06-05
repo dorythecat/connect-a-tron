@@ -172,22 +172,65 @@ else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
       <div class="measure_option" id="probe_hantek_dso2d15">
         <h3 class="measure_option_label">Probe attenuation</h3>
         <select class="measure_type" id="probe_value_hantek_dso2d15">
-          <option value="1">1x</option>
+          <option value="1" selected>1x</option>
           <option value="10">10x</option>
           <option value="50">50x</option>
           <option value="100">100x</option>
         </select>
       </div>
       <div class="measure_option" id="volt_scale_hantek_dso2d15">
-        <h3 class="measure_option_label">Volts per division</h3>
+        <h3 class="measure_option_label">Voltage scale (V/div)</h3>
         <input class="measure_option_number" id="volt_scale_number_hantek_dso2d15" type="number" min="0.001" max="10" value="1"/>
         <input class="measure_option_slider" id="volt_scale_slider_hantek_dso2d15" type="range" min="0.001" max="10" value="1" step="0.001"/>
       </div>
       <div class="measure_option" id="volt_offset_hantek_dso2d15">
-        <h3 class="measure_option_label">Voltage offset</h3>
+        <h3 class="measure_option_label">Voltage offset (V)</h3>
         <input class="measure_option_number" id="volt_offset_number_hantek_dso2d15" type="number" min="-50" max="50" value="0"/>
         <input class="measure_option_slider" id="volt_offset_slider_hantek_dso2d15" type="range" min="-50" max="50" value="0" step="0.01"/>
       </div>
+      <div class="measure_option" id="time_scale_hantek_dso2d15">
+        <h3 class="measure_option_label">Time scale</h3>
+        <select class="measure_type" id="time_scale_value_hantek_dso2d15">
+          <option value="0.000000002">2ns/div</option>
+          <option value="0.000000005">5ns/div</option>
+          <option value="0.00000001">10ns/div</option>
+          <option value="0.00000002">20ns/div</option>
+          <option value="0.00000005">50ns/div</option>
+          <option value="0.0000001">100ns/div</option>
+          <option value="0.0000002">200ns/div</option>
+          <option value="0.0000005">500ns/div</option>
+          <option value="0.000001">1us/div</option>
+          <option value="0.000002">2us/div</option>
+          <option value="0.000005">5us/div</option>
+          <option value="0.00001">10us/div</option>
+          <option value="0.00002">20us/div</option>
+          <option value="0.00005">50us/div</option>
+          <option value="0.0001">100us/div</option>
+          <option value="0.0002">200us/div</option>
+          <option value="0.0005" selected>500us/div</option>
+          <option value="0.001">1ms/div</option>
+          <option value="0.002">2ms/div</option>
+          <option value="0.005">5ms/div</option>
+          <option value="0.01">10ms/div</option>
+          <option value="0.02">20ms/div</option>
+          <option value="0.05">50ms/div</option>
+          <option value="0.1">100ms/div</option>
+          <option value="0.2">200ms/div</option>
+          <option value="0.5">500ms/div</option>
+          <option value="1">1s/div</option>
+          <option value="2">2s/div</option>
+          <option value="5">5s/div</option>
+          <option value="10">10s/div</option>
+          <option value="20">20s/div</option>
+          <option value="50">50s/div</option>
+          <option value="100">100s/div</option>
+        </select>
+      </div>
+    </div>
+    <div class="measure_option" id="time_offset_hantek_dso2d15">
+      <h3 class="measure_option_label">Time offset (s)</h3>
+      <input class="measure_option_number" id="time_offset_number_hantek_dso2d15" type="number" min="-1" max="1" value="0"/>
+      <input class="measure_option_slider" id="time_offset_slider_hantek_dso2d15" type="range" min="-1" max="1" value="0" step="0.0001"/>
     </div>
   </div>
 </div>
@@ -508,11 +551,19 @@ const volt_scale_slider_hantek_dso2d15 = document.getElementById('volt_scale_sli
 const volt_offset_number_hantek_dso2d15 = document.getElementById('volt_offset_number_hantek_dso2d15');
 const volt_offset_slider_hantek_dso2d15 = document.getElementById('volt_offset_slider_hantek_dso2d15');
 
+const time_scale_value_hantek_dso2d15 = document.getElementById('time_scale_value_hantek_dso2d15');
+
+const time_offset_number_hantek_dso2d15 = document.getElementById('time_offset_number_hantek_dso2d15');
+const time_offset_slider_hantek_dso2d15 = document.getElementById('time_offset_slider_hantek_dso2d15');
+
 // The display is not 100% faithful, but I personally refuse to measure pixels just to make it so. If you have a complaint, well, it's FOSS for a reason...
 document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
   let probe = probe_value_hantek_dso2d15.value;
   let volt_scale = volt_scale_number_hantek_dso2d15.value;
-  fetch(`${murl_hantek_dso2d15}?probe=${probe}&volt_scale=${volt_scale}`).then(function(response) {
+  let volt_offset = volt_offset_number_hantek_dso2d15.value;
+  let time_scale = time_scale_value_hantek_dso2d15.value;
+  let time_offset = time_offset_number_hantek_dso2d15.value;
+  fetch(`${murl_hantek_dso2d15}?probe=${probe}&volt_scale=${volt_scale}&volt_offset=${volt_offset}&time_scale=${time_scale}&time_offset=${time_offset}`).then(function(response) {
     return response.json();
   }).then(function(data) {
     // Useful variables for rendering
@@ -584,6 +635,15 @@ volt_offset_slider_hantek_dso2d15.addEventListener('input', () => {
 
 volt_offset_number_hantek_dso2d15.addEventListener('input', () => {
   volt_offset_slider_hantek_dso2d15.value = volt_offset_number_hantek_dso2d15.value = Math.max(volt_offset_number_hantek_dso2d15.min, Math.min(volt_offset_number_hantek_dso2d15.max, volt_offset_number_hantek_dso2d15.value));
+});
+
+time_offset_slider_hantek_dso2d15.addEventListener('input', () => {
+  time_offset_number_hantek_dso2d15.value = time_offset_slider_hantek_dso2d15.value;
+});
+
+time_offset_number_hantek_dso2d15.addEventListener('input', () => {
+  // We don't need to do maximum and minimum values here, since it can go to wherever it pleases
+  time_offset_slider_hantek_dso2d15.value = time_offset_number_hantek_dso2d15.value;
 });
 
 </script>
