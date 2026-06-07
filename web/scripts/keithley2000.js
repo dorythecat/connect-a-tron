@@ -43,7 +43,7 @@ const symbols = [ // Symbols the DMM uses for each measurement type
   "AAC",
   "OHM",
   "OHM",
-  "ºC", // TODO: We need to support all of the options the DMM accepts
+  "ºC",
   "SEC",
   "HZ",
   "VDC",
@@ -91,35 +91,31 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
   }).catch(function(err) { console.error(`Fetch error: ${err}`); });
 }
 
-// TODO: This function should run on reaload too, so some abstraction would be great too
-measure_type_keithley2000.addEventListener('change', () => { // This thing could probably be optimized a bunch imo
-  if (measure_type_keithley2000.value === '11') div_threshold_keithley2000.style = 'display: block';
-  else div_threshold_keithley2000.style = 'display: none';
+function temp_set() {
+  const zero_val = measure_temp_ref_keithley2000.value === '0';
+  div_temp_main_keithley2000.style = 'display: block';
+  div_temp_sim_keithley2000.style = `display: ${zero_val ? 'block' : 'none'}`;
+  div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = `display: ${zero_val ? 'none' : 'block'}`;
+}
 
-  if (['2', '4'].includes(measure_type_keithley2000.value)) div_bandwidth_keithley2000.style = 'display: block';
-  else div_bandwidth_keithley2000.style = 'display: none';
+document.addEventListener("DOMContentLoaded", () => {
+  div_threshold_keithley2000.style = `display: ${measure_type_keithley2000.value === '11' ? 'block' : 'none'}`;
+  div_bandwidth_keithley2000.style = `display: ${['2', '4'].includes(measure_type_keithley2000.value) ? 'block' : 'none'}`;
 
-  if (measure_type_keithley2000.value === '7') {
-    div_temp_main_keithley2000.style = 'display: block';
-    if (measure_temp_ref_keithley2000.value === '0') {
-      div_temp_sim_keithley2000.style = 'display: block';
-      div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: none';
-    } else {
-      div_temp_sim_keithley2000.style = 'display: none';
-      div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: block';
-    }
-  } else div_temp_main_keithley2000.style = 'display: none';
+  if (measure_type_keithley2000.value === '7') temp_set();
+  else div_temp_main_keithley2000.style = 'display: none';
+
+})
+
+measure_type_keithley2000.addEventListener('change', () => {
+  div_threshold_keithley2000.style = `display: ${measure_type_keithley2000.value === '11' ? 'block' : 'none'}`;
+  div_bandwidth_keithley2000.style = `display: ${['2', '4'].includes(measure_type_keithley2000.value) ? 'block' : 'none'}`;
+
+  if (measure_type_keithley2000.value === '7') temp_set();
+  else div_temp_main_keithley2000.style = 'display: none';
 });
 
-measure_temp_ref_keithley2000.addEventListener('change', () => {
-  if (measure_temp_ref_keithley2000.value === '0') {
-    div_temp_sim_keithley2000.style = 'display: block';
-    div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: none';
-  } else {
-    div_temp_sim_keithley2000.style = 'display: none';
-    div_temp_voff_keithley2000.style = div_temp_coef_keithley2000.style = 'display: block';
-  } 
-});
+measure_temp_ref_keithley2000.addEventListener('change', temp_set);
 
 // Sync sliders and number displays
 measure_samples_slider_keithley2000.addEventListener('input', () => {
