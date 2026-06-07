@@ -254,6 +254,7 @@ else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
       <input class="measure_option_slider" id="trigger_level_slider_hantek_dso2d15" type="range" min="-4" max="4" value="0" step="0.001"/>
     </div>
     <div class="measure_option" id="triger_slope_hantek_dso2d15">
+      <h3 class="measure_option_label">Trigger slope</h3>
       <select class="measure_type" id="trigger_slope_value_hantek_dso2d15">
         <option value="RISI" selected>Rising</option>
         <option value="FALL">Falling</option>
@@ -321,18 +322,18 @@ const symbols = [ // Symbols the DMM uses for each measurement type
 ];
 
 document.getElementById('measure_button_keithley2000').onclick = () => {
-  let mtype = parseInt(measure_type_keithley2000.value);
-  let fsamples = parseInt(measure_samples_number_keithley2000.value);
-  let ftype = measure_filter_type_keithley2000.value !== '0';
-  let nplc = parseFloat(measure_nplc_number_keithley2000.value);
-  let thr = parseFloat(measure_threshold_number_keithley2000.value);
-  let bandwidth = parseInt(measure_bandwidth_number_keithley2000.value);
-  let ttype = measure_temp_type_keithley2000.value;
-  let tref = measure_temp_ref_keithley2000.value !== '0';
-  let simtemp = parseInt(measure_temp_sim_number_keithley2000.value);
-  let tcoef = parseFloat(measure_temp_coef_number_keithley2000.value);
-  let voff = parseFloat(measure_temp_voff_number_keithley2000.value);
-  let start_text = `----.---${symbols[mtype]}`;
+  const mtype = parseInt(measure_type_keithley2000.value);
+  const fsamples = parseInt(measure_samples_number_keithley2000.value);
+  const ftype = measure_filter_type_keithley2000.value !== '0';
+  const nplc = parseFloat(measure_nplc_number_keithley2000.value);
+  const thr = parseFloat(measure_threshold_number_keithley2000.value);
+  const bandwidth = parseInt(measure_bandwidth_number_keithley2000.value);
+  const ttype = measure_temp_type_keithley2000.value;
+  const tref = measure_temp_ref_keithley2000.value !== '0';
+  const simtemp = parseInt(measure_temp_sim_number_keithley2000.value);
+  const tcoef = parseFloat(measure_temp_coef_number_keithley2000.value);
+  const voff = parseFloat(measure_temp_voff_number_keithley2000.value);
+  const start_text = `----.---${symbols[mtype]}`;
   let html = '';
   for (const digit in start_text) html += start_text[digit] == '.' ? '.' : `${digit === 0 ? '' : '</a>'}<a>${start_text[digit]}`;
   result_keithley2000.innerHTML = html + '</a>';
@@ -342,12 +343,12 @@ document.getElementById('measure_button_keithley2000').onclick = () => {
     data = parseFloat(data);
     if (data > 1e20) data = mtype === 11 ? 'OPEN' : [8, 9].includes(mtype) ? `OVRFLW  ${symbols[mtype]}` : 'OVR.FLW MOHM';
     else {
-      let mega = data > 100000 && [5, 6].includes(mtype);
-      let kilo = data > (mtype === 9 ? 1000 : 100) && [5, 6, 9].includes(mtype);
-      let milli = Math.abs(data) <= ([8, 9].includes(mtype) ? 1 : 0.1) && [1, 2, 3, 8, 9].includes(mtype);
-      let millii = Math.abs(data) <= 0.01 && mtype === 3;
-      let micro = data <= 0.001 && mtype === 8;
-      let og_data = data;
+      const mega = data > 100000 && [5, 6].includes(mtype);
+      const kilo = data > (mtype === 9 ? 1000 : 100) && [5, 6, 9].includes(mtype);
+      const milli = Math.abs(data) <= ([8, 9].includes(mtype) ? 1 : 0.1) && [1, 2, 3, 8, 9].includes(mtype);
+      const millii = Math.abs(data) <= 0.01 && mtype === 3;
+      const micro = data <= -1.001 && mtype === 8;
+      const og_data = data;
       data *= (micro ? 1000 : 1) * (milli ? 1000 : 1) * (kilo ? 0.001 : 1) * (mega ? 0.001 : 1);
       let digits = Math.min(5 - Math.floor(Math.log10(Math.abs(kilo ? data : og_data))), !kilo && [5, 6].includes(mtype) ? 4 : mtype === 10 ? 5 : 6, mtype === 11 ? 1 : 6) + ([8, 9].includes(mtype));
       data = String(data.toFixed(milli ? (micro ? 6 - Math.floor(Math.log10(data)) : 4 + millii) : digits));
@@ -599,16 +600,16 @@ let yScale = 500; // Scale of the voltage divisions
 
 // The display is not 100% faithful, but I personally refuse to measure pixels just to make it so. If you have a complaint, well, it's FOSS for a reason...
 document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
-  let probe = probe_value_hantek_dso2d15.value;
-  let volt_scale = volt_scale_number_hantek_dso2d15.value;
-  let volt_offset = volt_offset_number_hantek_dso2d15.value;
-  let time_scale = time_scale_value_hantek_dso2d15.value;
-  let time_offset = time_offset_number_hantek_dso2d15.value;
-  let invert = invert_value_hantek_dso2d15.value;
-  let coupling = coupling_value_hantek_dso2d15.value;
-  let bw_limit = bw_limit_value_hantek_dso2d15.value;
-  let trigger_level = trigger_level_number_hantek_dso2d15.value;
-  let trigger_slope = trigger_slope_value_hantek_dso2d15.value;
+  const probe = probe_value_hantek_dso2d15.value;
+  const volt_scale = volt_scale_number_hantek_dso2d15.value;
+  const volt_offset = volt_offset_number_hantek_dso2d15.value;
+  const time_scale = time_scale_value_hantek_dso2d15.value;
+  const time_offset = time_offset_number_hantek_dso2d15.value;
+  const invert = invert_value_hantek_dso2d15.value;
+  const coupling = coupling_value_hantek_dso2d15.value;
+  const bw_limit = bw_limit_value_hantek_dso2d15.value;
+  const trigger_level = trigger_level_number_hantek_dso2d15.value;
+  const trigger_slope = trigger_slope_value_hantek_dso2d15.value;
   fetch(`${murl_hantek_dso2d15}?probe=${probe}&volt_scale=${volt_scale}&volt_offset=${volt_offset}&time_scale=${time_scale}&time_offset=${time_offset}&invert=${invert}&coupling=${coupling}&bw_limit=${bw_limit}&trigger_level=${trigger_level}&trigger_slope=${trigger_slope}`).then(function(response) {
     return response.json();
   }).then(function(data) {
