@@ -232,6 +232,34 @@ else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
       <input class="measure_option_number" id="time_offset_number_hantek_dso2d15" type="number" min="-1" max="1" value="0"/>
       <input class="measure_option_slider" id="time_offset_slider_hantek_dso2d15" type="range" min="-1" max="1" value="0" step="0.0001"/>
     </div>
+    <div class="measure_option" id="invert_hantek_dso2d15">
+      <h3 class="measure_option_label">Invert</h3>
+      <input class="measure_option_checkbox" id="invert_value_hantek_dso2d15" type="checkbox"/>
+    </div>
+    <div class="measure_option" id="coupling_hantek_dso2d15">
+      <h3 class="meaasure_option_label">Coupling mode</h3>
+      <select class="measure_type" id="coupling_value_hantek_dso2d15">
+        <option value="DC" selected>DC</option>
+        <option value="AC">AC</option>
+        <option value="GND">GND</option>
+      </select>
+    </div>
+    <div class="measure_option" id="bw_limit_hantek_dso2d15">
+      <h3 class="measure_option_label">Bandwidth limit</h3>
+      <input class="measure_option_checkbox" id="bw_limit_value_hantek_dso2d15" type="checkbox"/>
+    </div>
+    <div class="measure_option" id="trigger_level_hantek_dso2d15">
+      <h3 class="measure_option_label">Trigger level (V)</h3>
+      <input class="measure_option_number" id="trigger_level_number_hantek_dso2d15" type="number" min="-4" max="4" value="0"/>
+      <input class="measure_option_slider" id="trigger_level_slider_hantek_dso2d15" type="range" min="-4" max="4" value="0" step="0.001"/>
+    </div>
+    <div class="measure_option" id="triger_slope_hantek_dso2d15">
+      <select class="measure_type" id="trigger_slope_value_hantek_dso2d15">
+        <option value="RISI" selected>Rising</option>
+        <option value="FALL">Falling</option>
+        <option value="EITH">Either</option>
+      </select>
+    </div>
   </div>
 </div>
 </body>
@@ -556,6 +584,19 @@ const time_scale_value_hantek_dso2d15 = document.getElementById('time_scale_valu
 const time_offset_number_hantek_dso2d15 = document.getElementById('time_offset_number_hantek_dso2d15');
 const time_offset_slider_hantek_dso2d15 = document.getElementById('time_offset_slider_hantek_dso2d15');
 
+const invert_value_hantek_dso2d15 = document.getElementById('invert_value_hantek_dso2d15');
+
+const coupling_value_hantek_dso2d15 = document.getElementById('coupling_value_hantek_dso2d15');
+
+const bw_limit_value_hantek_dso2d15 = document.getElementById('bw_limit_value_hantek_dso2d15');
+
+const trigger_level_number_hantek_dso2d15 = document.getElementById('trigger_level_number_hantek_dso2d15');
+const trigger_level_slider_hantek_dso2d15 = document.getElementById('trigger_level_slider_hantek_dso2d15');
+
+const trigger_slope_value_hantek_dso2d15 = document.getElementById('trigger_slope_value_hantek_dso2d15');
+
+let yScale = 500; // Scale of the voltage divisions
+
 // The display is not 100% faithful, but I personally refuse to measure pixels just to make it so. If you have a complaint, well, it's FOSS for a reason...
 document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
   let probe = probe_value_hantek_dso2d15.value;
@@ -563,12 +604,15 @@ document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
   let volt_offset = volt_offset_number_hantek_dso2d15.value;
   let time_scale = time_scale_value_hantek_dso2d15.value;
   let time_offset = time_offset_number_hantek_dso2d15.value;
-  fetch(`${murl_hantek_dso2d15}?probe=${probe}&volt_scale=${volt_scale}&volt_offset=${volt_offset}&time_scale=${time_scale}&time_offset=${time_offset}`).then(function(response) {
+  let invert = invert_value_hantek_dso2d15.value;
+  let coupling = coupling_value_hantek_dso2d15.value;
+  let bw_limit = bw_limit_value_hantek_dso2d15.value;
+  let trigger_level = trigger_level_number_hantek_dso2d15.value;
+  let trigger_slope = trigger_slope_value_hantek_dso2d15.value;
+  fetch(`${murl_hantek_dso2d15}?probe=${probe}&volt_scale=${volt_scale}&volt_offset=${volt_offset}&time_scale=${time_scale}&time_offset=${time_offset}&invert=${invert}&coupling=${coupling}&bw_limit=${bw_limit}&trigger_level=${trigger_level}&trigger_slope=${trigger_slope}`).then(function(response) {
     return response.json();
   }).then(function(data) {
-    // Useful variables for rendering
-    const yScale = 500; // 1 V / division (should adjust to selected scale once that's implemented)
-
+    // Variables for rendering
     const ctx = waveform_hantek_dso2d15.getContext('2d');
     ctx.clearRect(0, 0, 800, 480);
 
@@ -611,7 +655,6 @@ document.getElementById('measure_button_hantek_dso2d15').onclick = () => {
 }
 
 probe_value_hantek_dso2d15.addEventListener('input', () => {
-  // TODO: Make step sizes also change
   const probe = probe_value_hantek_dso2d15.value;
 
   volt_scale_slider_hantek_dso2d15.min = volt_scale_number_hantek_dso2d15.min = 0.001 * probe;
@@ -619,14 +662,22 @@ probe_value_hantek_dso2d15.addEventListener('input', () => {
 
   volt_offset_slider_hantek_dso2d15.min = volt_offset_number_hantek_dso2d15.min = -50 * probe;
   volt_offset_slider_hantek_dso2d15.max = volt_offset_number_hantek_dso2d15.max = 50 * probe;
+
+  yScale = 500 * volt_scale; // This works pretty roughly, but well enough for the intended display
 });
 
 volt_scale_slider_hantek_dso2d15.addEventListener('input', () => {
-  volt_scale_number_hantek_dso2d15.value = volt_scale_slider_hantek_dso2d15.value;
+  const volt_scale = volt_scale_number_hantek_dso2d15.value = volt_scale_slider_hantek_dso2d15.value;
+
+  trigger_level_number_hantek_dso2d15.min = trigger_level_slider_hantek_dso2d15.min = -4 * volt_scale;
+  trigger_level_number_hantek_dso2d15.max = trigger_level_slider_hantek_dso2d15.max = 4 * volt_scale;
 });
 
 volt_scale_number_hantek_dso2d15.addEventListener('input', () => {
-  volt_scale_slider_hantek_dso2d15.value = volt_scale_number_hantek_dso2d15.value = Math.max(volt_scale_number_hantek_dso2d15.min, Math.min(volt_scale_number_hantek_dso2d15.max, volt_scale_number_hantek_dso2d15.value));
+  const volt_scale = volt_scale_slider_hantek_dso2d15.value = volt_scale_number_hantek_dso2d15.value = Math.max(volt_scale_number_hantek_dso2d15.min, Math.min(volt_scale_number_hantek_dso2d15.max, volt_scale_number_hantek_dso2d15.value));
+
+  trigger_level_number_hantek_dso2d15.min = trigger_level_slider_hantek_dso2d15.min = -4 * volt_scale;
+  trigger_level_number_hantek_dso2d15.max = trigger_level_slider_hantek_dso2d15.max = 4 * volt_scale;
 });
 
 volt_offset_slider_hantek_dso2d15.addEventListener('input', () => {
@@ -644,6 +695,14 @@ time_offset_slider_hantek_dso2d15.addEventListener('input', () => {
 time_offset_number_hantek_dso2d15.addEventListener('input', () => {
   // We don't need to do maximum and minimum values here, since it can go to wherever it pleases
   time_offset_slider_hantek_dso2d15.value = time_offset_number_hantek_dso2d15.value;
+});
+
+trigger_level_slider_hantek_dso2d15.addEventListener('input', () => {
+  trigger_level_number_hantek_dso2d15.value = trigger_level_slider_hantek_dso2d15.value;
+});
+
+trigger_level_number_hantek_dso2d15.addEventListener('input', () => {
+  trigger_level_slider_hantek_dso2d15.value = trigger_level_number_hantek_dso2d15.value = Math.min(trigger_level_number_hantek_dso2d15.max, Math.max(trigger_level_number_hantek_dso2d15.min, trigger_level_number_hantek_dso2d15.value));
 });
 
 </script>
