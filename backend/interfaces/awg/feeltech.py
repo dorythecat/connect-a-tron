@@ -1,0 +1,80 @@
+from enum import Enum
+
+import interfaces.awg.awg as awg
+
+class WaveType(Enum):
+    SINE  = 0
+    SQUR  = 1
+    TRGL  = 2
+    STW   = 3
+    NSTW  = 4
+    DC    = 5
+    PRE1  = 6  # Lorentz pulse
+    PRE2  = 7  # Multitonal
+    PRE3  = 8  # Periodic random noise
+    PRE4  = 9  # Electrocardiogram
+    PRE5  = 10 # Trapezoidal
+    PRE6  = 11 # Sinc (sin(x)/x)
+    PRE7  = 12 # Pulse
+    PRE8  = 13 # Gaussian white noise
+    PRE9  = 14 # Amplitude Modulated (AM)
+    PRE10 = 15 # Frequency Modulated (FM)
+    ARB1  = 16
+    ARB2  = 17
+    ARB3  = 18
+    ARB4  = 19
+
+class FY3200S(awg.AWG):
+    def __init__(self, port: str = "/dev/ttyUSB0") -> None:
+        super().__init__(port)
+
+    def __del__(self) -> None:
+        super().__del__()
+
+    # Helper functions for the connection, meant only for internal use
+    def _send(self, command: str) -> None:
+        self._conn.write(command.encode('unicode_escape'))
+
+    def _get_str(self, command: str, size: int = 64) -> str:
+        self._conn.write(command.encode('unicode_escape'))
+        return self._conn.read(size).decode('unicode_escape')
+
+    @property
+    def id(self) -> str:
+        return _get_str("a")
+
+    def set_waveform(self, channel: int = 1, freq: float = 1000, amp: float = 1, offset: float = 0, duty: float = 50, typ: WaveType = WaveType.SINE, phase: int = 0) -> None:
+        """
+        Sets the waveform for the arbitrary waveform generator to produce.
+
+        :param channel: Channel of the generator to set. (1 or 2)
+        :param freq: Frequency of the desired wave, in Hertzs. (0.01 <= freq <= 20000000) (0 will turn the generator off)
+        :param amp: Amplitude of the desired wave, in Volts. (0.01 <= amp <= 20) (0 will turn the generator off)
+        :param offset: Offset of the desired wave, in Volts. (abs(offset) <= 10)
+        :param duty: Duty cycle of the desired wave, in percentage. (0.1 <= duty <= 99.9)
+        :oaram typ: Type of the desired wave.
+        :param phase: Phase offset of the desired wave. (0 <= phase <= 359)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if channel not in [1, 2]:
+            raise AttributeError("Invalid channel provided!")
+        if freq != 0 and not 0.01 <= freq <= 20000000:
+            raise AttributeError("Invalid frequency value provided!")
+        if amp != 0 and not 0.01 <= amp <= 20:
+            raise AttributeError("Invalid amplitude value provided!")
+        if abs(offset) > 10:
+            raise AttributeError("Invalid offset value provided!")
+        if not 0.1 <= duty <= 99.9:
+            raise AttributeError("Invalid duty cycle value provided!")
+        if not 0 <= phase <= 359:
+            raise AttributeError("Invalid phase value provided!")
+
+        chan = "b" if channel == 1 else "d" # Channel select letter
+        self._send(f'{chan}f{freq}')
+        self._send(f'{chan}a{amp}')
+        self._send(f'{chan}o{offset}')
+        self._send(f'{chan}d{duty}')
+        self._send(f'{chan}w{typ.value}')
+        self._send(f'{chan}p{phase}')
