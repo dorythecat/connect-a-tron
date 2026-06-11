@@ -4,41 +4,21 @@ class DSO2D15(oscilloscope.Oscilloscope):
     def __init__(self, port: str = "/dev/usbtmc0") -> None:
         super().__init__(port)
 
-    def __del__(self) -> None:
-        super().__del__()
-
-    # Helper functions for the serial connection
-    # These don't have any protections or description because they're only meant for internal use
-    def _scpi_send(self, command: str) -> None:
-        self._conn.write(command.encode('unicode_escape'))
-
-    def _scpi_get_bytes(self, command: str, size: int = 4096) -> bytes:
-        self._conn.write(command.encode('unicode_escape'))
-        return self._conn.read(size)
-
-    def _scpi_get_str(self, command: str, size: int = 8) -> str:
-        self._conn.write(command.encode('unicode_escape'))
-        return self._conn.read(size).decode('unicode_escape')
-
-    def _scpi_get_float(self, command: str, size: int = 16) -> float:
-        self._conn.write(command.encode('unicode_escape'))
-        return float(self._conn.read(size).decode('unicode_escape'))
-
     @property
     def id(self) -> str:
-        return self._scpi_get_str('*IDN?', 32)
+        return self._get_str('*IDN?')
 
     @property
     def keypad_lock(self) -> bool:
-        return self._scpi_get_str(':SYST:LOCK?') == "ON"
+        return self._get_str(':SYST:LOCK?') == "ON"
 
     @keypad_lock.setter
     def keypad_lock(self, value: bool) -> None:
-        self._scpi_send(f':SYST:LOCK {int(value)}')
+        self._send(f':SYST:LOCK {int(value)}')
 
     @property
     def trigger_status(self) -> bool:
-        return self._scpi_get_str(':TRIG:STAT?') != "NOTRIG"
+        return self._get_str(':TRIG:STAT?') != "NOTRIG"
 
     def frequency(self, channel: int = 1) -> float:
         """
@@ -52,10 +32,10 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
-        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
-        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
-        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
-        return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? FREQ')
+        self._send(':MEAS:ENAB 1') # Enable measurement
+        self._send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
+        return self._get_float(f':MEAS:CHAN{channel}:ITEM? FREQ')
 
     def period(self, channel: int = 1) -> float:
         """
@@ -69,10 +49,10 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
-        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
-        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
-        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
-        return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? PERIOD')
+        self._send(':MEAS:ENAB 1') # Enable measurement
+        self._send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
+        return self._get_float(f':MEAS:CHAN{channel}:ITEM? PERIOD')
 
     def rms(self, channel: int = 1) -> float:
         """
@@ -86,10 +66,10 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
-        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
-        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
-        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
-        return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? RMS')
+        self._send(':MEAS:ENAB 1') # Enable measurement
+        self._send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
+        return self._get_float(f':MEAS:CHAN{channel}:ITEM? RMS')
 
     def ppk(self, channel: int = 1) -> float:
         """https://www.youtube.com/watch?v=oqOlrGPgng8
@@ -103,10 +83,10 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if channel not in [1, 2]:
             raise AttributeError("Invalid channel provided!")
 
-        self._scpi_send(':MEAS:ENAB 1') # Enable measurement
-        self._scpi_send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
-        self._scpi_send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
-        return self._scpi_get_float(f':MEAS:CHAN{channel}:ITEM? VPP')
+        self._send(':MEAS:ENAB 1') # Enable measurement
+        self._send(f':MEAS:SOUR CHAN{channel}') # Set the proper source for measurements
+        self._send(':MEAS:ADIS 0') # Turn off dispolay of all of the measurements
+        return self._get_float(f':MEAS:CHAN{channel}:ITEM? VPP')
 
     def force_trigger(self) -> None:
         """
@@ -114,7 +94,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
 
         :returns: Nothing.
         """
-        self._scpi_send(':TRIG:FORC')
+        self._send(':TRIG:FORC')
 
     def time_conf(self, scale: float = 0.0005, offset: float = 0, mode: str = "MAIN", window: bool = False, window_scale: float = 0.0001, window_offset: float = 0) -> None:
         """
@@ -137,17 +117,17 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if mode not in ["MAIN", "XY", "ROLL"]:
             raise AttributeError("Invalid mode value provided!")
 
-        self._scpi_send(f':TIM:SCAL {scale}')
-        self._scpi_send(f':TIM:POS {offset}')
-        self._scpi_send(f':TIM:MODE {mode}')
+        self._send(f':TIM:SCAL {scale}')
+        self._send(f':TIM:POS {offset}')
+        self._send(f':TIM:MODE {mode}')
 
         if not window:
-            self._scpi_send(':TIM:WIND:ENAB 0')
+            self._send(':TIM:WIND:ENAB 0')
             return
 
-        self._scpi_send(':TIM:WIND:ENAB 1')
-        self._scpi_send(f':TIM:WIND:SCAL {window_scale}')
-        self._scpi_send(f':TIM:WIND:POS {window_offset}')
+        self._send(':TIM:WIND:ENAB 1')
+        self._send(f':TIM:WIND:SCAL {window_scale}')
+        self._send(f':TIM:WIND:POS {window_offset}')
 
     def channel_conf(self, channel: int = 1, on: bool = True, scale: float = 1, offset: float = 0, probe: int = 1, invert: bool = False, coupling: str = "DC", bw_limit: bool = False) -> None:
         """
@@ -177,19 +157,19 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid coupling value provided!")
 
         if not on:
-            self._scpi_send(f':CHAN{channel}:DISP 0')
+            self._send(f':CHAN{channel}:DISP 0')
             return
 
-        self._scpi_send(f':CHAN{channel}:DISP 1')
-        self._scpi_send(f':CHAN{channel}:PROB {probe}')
+        self._send(f':CHAN{channel}:DISP 1')
+        self._send(f':CHAN{channel}:PROB {probe}')
         # If the scale is not a usually selectable one, activate vernier mode
         vernier = (scale / probe) not in [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10]
-        self._scpi_send(f':CHAN{channel}:VERN {int(vernier)}')
-        self._scpi_send(f':CHAN{channel}:SCAL {scale}V')
-        self._scpi_send(f':CHAN{channel}:OFFS {offset}V')
-        self._scpi_send(f':CHAN{channel}:COUP {coupling}')
-        self._scpi_send(f':CHAN{channel}:BWL {'1' if bw_limit else '0'}')
-        self._scpi_send(f':CHAN{channel}:INV {'1' if invert else '0'}')
+        self._send(f':CHAN{channel}:VERN {int(vernier)}')
+        self._send(f':CHAN{channel}:SCAL {scale}V')
+        self._send(f':CHAN{channel}:OFFS {offset}V')
+        self._send(f':CHAN{channel}:COUP {coupling}')
+        self._send(f':CHAN{channel}:BWL {'1' if bw_limit else '0'}')
+        self._send(f':CHAN{channel}:INV {'1' if invert else '0'}')
 
     def trigger_conf_general(self, mode: str = "AUTO", holdoff: float = 0.000000016) -> None:
         """
@@ -205,8 +185,8 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid mode value provided!")
         if not 0.000000016 <= holdoff <= 10:
             raise AttributeError("Invalid holdoff value provided!")
-        self._scpi_send(f':TRIG:SWE {mode}')
-        self._scpi_send(f':TRIG:HOLD {holdoff}')
+        self._send(f':TRIG:SWE {mode}')
+        self._send(f':TRIG:HOLD {holdoff}')
 
     def trigger_conf_edge(self, source: int = 1, level: float = 0, slope: str = "RISI") -> None:
         """
@@ -224,13 +204,13 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if slope not in ["RISI", "FALL", "EITH"]:
             raise AttributeError("Invalid slope value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(':TRIG:MODE EDGE')
-        self._scpi_send(f':TRIG:EDG:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:EDG:SLOP {slope}')
-        self._scpi_send(f':TRIG:EDG:LEV {level}')
+        self._send(':TRIG:MODE EDGE')
+        self._send(f':TRIG:EDG:SOUR CHAN{source}')
+        self._send(f':TRIG:EDG:SLOP {slope}')
+        self._send(f':TRIG:EDG:LEV {level}')
 
     def trigger_conf_pulse(self, source: int = 1, level: float = 0, polarity: bool = True, width: float = 0.0000002, when: str = "GREA") -> None:
         """
@@ -252,15 +232,15 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
             raise AttributeError("Invalid when value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(b':TRIG:MODE PULS')
-        self._scpi_send(f':TRIG:PULS:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:PULS:POL {'POSI' if polarity else 'NEGA'}')
-        self._scpi_send(f':TRIG:PULS:WHEN {when}')
-        self._scpi_send(f':TRIG:PULS:WID {width}')
-        self._scpi_send(f':TRIG:PULS:LEV {level}')
+        self._send(b':TRIG:MODE PULS')
+        self._send(f':TRIG:PULS:SOUR CHAN{source}')
+        self._send(f':TRIG:PULS:POL {'POSI' if polarity else 'NEGA'}')
+        self._send(f':TRIG:PULS:WHEN {when}')
+        self._send(f':TRIG:PULS:WID {width}')
+        self._send(f':TRIG:PULS:LEV {level}')
 
     def trigger_conf_slope(self, source: int = 1, upper_level: float = 2, lower_level: float = -2, polarity: bool = True, width: float = 0.0000002, when: str = "GREA") -> None:
         """
@@ -285,19 +265,19 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
             raise AttributeError("Invalid when value provided!")
         #Check this last so we don't waste time if any of the other values are invalid
-        vert_scale = 4 * self._scpi_get_float(f':CHAN{source}:SCAL?')
+        vert_scale = 4 * self._get_float(f':CHAN{source}:SCAL?')
         if abs(upper_level) > vert_scale:
             raise AttributeError("Invalid upper level value provided!")
         if abs(lower_level) > vert_scale:
             raise AttributeError("Invalid lower level value provided!")
 
-        self._scpi_send(':TRIG:MODE SLOP')
-        self._scpi_send(f':TRIG:SLOP:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:SLOP:POL {'POSI' if polarity else 'NEGA'}')
-        self._scpi_send(f':TRIG:SLOP:WHEN {when}')
-        self._scpi_send(f':TRIG:SLOP:WID {width}')
-        self._scpi_send(f':TRIG:SLOP:ALEV {upper_level}')
-        self._scpi_send(f':TRIG:SLOP:BLEV {lower_level}')
+        self._send(':TRIG:MODE SLOP')
+        self._send(f':TRIG:SLOP:SOUR CHAN{source}')
+        self._send(f':TRIG:SLOP:POL {'POSI' if polarity else 'NEGA'}')
+        self._send(f':TRIG:SLOP:WHEN {when}')
+        self._send(f':TRIG:SLOP:WID {width}')
+        self._send(f':TRIG:SLOP:ALEV {upper_level}')
+        self._send(f':TRIG:SLOP:BLEV {lower_level}')
 
     def trigger_conf_interval(self, source: int = 1, level: float = 0, slope: str = "RISI", time: float = 0.0000002, when: str = "GREA") -> None:
         """
@@ -321,15 +301,15 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
             raise AttributeError("Invalid when value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(':TRIG:MODE INT')
-        self._scpi_send(f':TRIG:INTERVAL:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:INTERVAL:SLO {slope}')
-        self._scpi_send(f':TRIG:INTERVAL:WHEN {when}')
-        self._scpi_send(f':TRIG:INTERVAL:TIME {time}')
-        self._scpi_send(f':TRIG:INTERVAL:ALEV {level}')
+        self._send(':TRIG:MODE INT')
+        self._send(f':TRIG:INTERVAL:SOUR CHAN{source}')
+        self._send(f':TRIG:INTERVAL:SLO {slope}')
+        self._send(f':TRIG:INTERVAL:WHEN {when}')
+        self._send(f':TRIG:INTERVAL:TIME {time}')
+        self._send(f':TRIG:INTERVAL:ALEV {level}')
 
     def trigger_conf_underthrow(self, source: int = 1, upper_level: float = 2, lower_level: float = -2, polarity: bool = True, time: float = 0.0000002, when: str = "GREA") -> None:
         """
@@ -354,19 +334,19 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if when not in ["EQUA", "NEQU", "GREA", "LESS"]:
             raise AttributeError("Invalid when value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        vert_scale = 4 * self._scpi_get_float(f':CHAN{source}:SCAL?')
+        vert_scale = 4 * self._get_float(f':CHAN{source}:SCAL?')
         if abs(upper_level) > vert_scale:
             raise AttributeError("Invalid upper level value provided!")
         if abs(lower_level) > vert_scale:
             raise AttributeError("Invalid lower level value provided!")
 
-        self._scpi_send(':TRIG:MODE UND')
-        self._scpi_send(f':TRIG:UNDER_A:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:UNDER_A:POL {'POSI' if polarity else 'NEGA'}')
-        self._scpi_send(f':TRIG:UNDER_A:WHEN {when}')
-        self._scpi_send(f':TRIG:UNDER_A:TIME {time}')
-        self._scpi_send(f':TRIG:UNDER_A:ALEV {upper_level}')
-        self._scpi_send(f':TRIG:UNDER_A:BLEV {lower_level}')
+        self._send(':TRIG:MODE UND')
+        self._send(f':TRIG:UNDER_A:SOUR CHAN{source}')
+        self._send(f':TRIG:UNDER_A:POL {'POSI' if polarity else 'NEGA'}')
+        self._send(f':TRIG:UNDER_A:WHEN {when}')
+        self._send(f':TRIG:UNDER_A:TIME {time}')
+        self._send(f':TRIG:UNDER_A:ALEV {upper_level}')
+        self._send(f':TRIG:UNDER_A:BLEV {lower_level}')
 
     def trigger_conf_timeout(self, source: int = 1, level: float = 0, polarity: bool = True, width: float = 0.0000002) -> None:
         """
@@ -385,14 +365,14 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if not 0.000000008 <= width <= 10:
             raise AttributeError("Invalid width value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(':TRIG:MODE TIM')
-        self._scpi_send(f':TRIG:TIM:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:TIM:LEV {level}')
-        self._scpi_send(f':TRIG:TIM:WID {width}')
-        self._scpi_send(f':TRIG:TIM:POL {'POSI' if polarity else 'NEGA'}')
+        self._send(':TRIG:MODE TIM')
+        self._send(f':TRIG:TIM:SOUR CHAN{source}')
+        self._send(f':TRIG:TIM:LEV {level}')
+        self._send(f':TRIG:TIM:WID {width}')
+        self._send(f':TRIG:TIM:POL {'POSI' if polarity else 'NEGA'}')
 
     def trigger_conf_window(self, source: int = 1, upper_level: float = 2, lower_level: float = -2) -> None:
         """
@@ -410,16 +390,16 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if upper_level <= lower_level:
             raise AttributeError("The upper level value must be greater than the lower level value!")
         # Check this last so we don't waste time if any of the other values are invalid
-        vert_scale = 4 * self._scpi_get_float(f':CHAN{source}:SCAL?')
+        vert_scale = 4 * self._get_float(f':CHAN{source}:SCAL?')
         if abs(upper_level) > vert_scale:
             raise AttributeError("Invalid upper level value provided!")
         if abs(lower_level) > vert_scale:
             raise AttributeError("Invalid lower level value provided!")
 
-        self._scpi_send(':TRIG:MODE WIN')
-        self._scpi_send(f':TRIG:WINDO:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:WINDO:ALEV {upper_level}')
-        self._scpi_send(f':TRIG:WINDO:BLEV {lower_level}')
+        self._send(':TRIG:MODE WIN')
+        self._send(f':TRIG:WINDO:SOUR CHAN{source}')
+        self._send(f':TRIG:WINDO:ALEV {upper_level}')
+        self._send(f':TRIG:WINDO:BLEV {lower_level}')
 
     def trigger_conf_pattern(self, pattern: str = "R,X", levels: str = "1,0;2,0") -> None:
         """
@@ -440,12 +420,12 @@ class DSO2D15(oscilloscope.Oscilloscope):
                 raise AttributeError(f"Invalid pattern value provided! \"{p.strip()}\" is not an allowed setting!")
         # Check this last so we don't waste time if any of the other values are invalid
         for channel in [1, 2]:
-            if abs(levels_list[channel - 1][1]) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+            if abs(levels_list[channel - 1][1]) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
                 raise AttributeError(f"Invalid levels value provided! Channel {channel}'s level is out of range!")
-        self._scpi_send(':TRIG:MODE PATT')
-        self._scpi_send(f':TRIG:PATT:PATT {pattern}')
+        self._send(':TRIG:MODE PATT')
+        self._send(f':TRIG:PATT:PATT {pattern}')
         for channel in [0, 1]:
-            self._scpi_send(f':TRIG:PATT:LEV CHAN{levels_list[channel]}')
+            self._send(f':TRIG:PATT:LEV CHAN{levels_list[channel]}')
 
     def trigger_conf_video(self, source: int = 1, level: float = 0, polarity: bool = True, standard: str = "PAL", mode: str = "ALIN", line: int = 1) -> None:
         """
@@ -470,17 +450,17 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if not 1 <= line <= (525 if standard == "NTSC" else 625):
             raise AttributeError("Provided line value is invalid!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(':TRIG:MODE TV')
-        self._scpi_send(f':TRIG:TV:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:TV:POL {'POSI' if polarity else 'NEGA'}')
-        self._scpi_send(f':TRIG:TV:MODE {mode}')
-        self._scpi_send(f':TRIG:TV:STAN {standard}')
-        self._scpi_send(f':TRIG:VID:LEV {level}')
+        self._send(':TRIG:MODE TV')
+        self._send(f':TRIG:TV:SOUR CHAN{source}')
+        self._send(f':TRIG:TV:POL {'POSI' if polarity else 'NEGA'}')
+        self._send(f':TRIG:TV:MODE {mode}')
+        self._send(f':TRIG:TV:STAN {standard}')
+        self._send(f':TRIG:VID:LEV {level}')
         if mode == "LINE":
-            self._scpi_send(':TRIG:TV:LINE {line}')
+            self._send(':TRIG:TV:LINE {line}')
 
     def trigger_conf_uart(self, source: int = 1, level: float = 0, width: int = 8, baud_rate: int = 9600, parity: str = "NONE", data: int = 0xff, condition: str = "START") -> None:
         """
@@ -510,19 +490,19 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if condition not in ["START", "STOP", "READ_DATA", "PARITY_ERR", "COM_ERR"]:
             raise AttributeError("Provided condition value is invalid!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(':TRIG:MODE UART')
-        self._scpi_send(f':TRIG:UART:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:UART:COND {condition}')
-        self._scpi_send(f':TRIG:UART:BAU {'USER' if baud_rate == 0 else baud_rate}')
-        self._scpi_send(f':TRIG:UART:ALEV {level}')
+        self._send(':TRIG:MODE UART')
+        self._send(f':TRIG:UART:SOUR CHAN{source}')
+        self._send(f':TRIG:UART:COND {condition}')
+        self._send(f':TRIG:UART:BAU {'USER' if baud_rate == 0 else baud_rate}')
+        self._send(f':TRIG:UART:ALEV {level}')
         if condition == "READ_DATA":
-            self._scpi_send(f':TRIG:UART:DATA {data}')
+            self._send(f':TRIG:UART:DATA {data}')
         elif condition in ["PARITY_ERR", "COM_ERR"]:
-            self._scpi_send(f':TRIG:UART:WIDT {width}')
-            self._scpi_send(f':TRIG:UART:PARI {parity}')
+            self._send(f':TRIG:UART:WIDT {width}')
+            self._send(f':TRIG:UART:PARI {parity}')
 
     def trigger_conf_spi(self, source_sda: int = 1, source_scl: int = 2, level_sda: float = 0, level_scl: float = 0, clock_edge: bool = True, width: int = 8, data: int = 0xff, mask: int = 0) -> None:
         """
@@ -553,20 +533,20 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if not 0 <= mask <= 4294967295:
             raise AttributeError("Invalid mask value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level_sda) > 4 * self._scpi_get_float(f':CHAN{source_sda}:SCAL?'):
+        if abs(level_sda) > 4 * self._get_float(f':CHAN{source_sda}:SCAL?'):
             raise AttributeError("Invalid data level value provided!")
-        if abs(level_scl) > 4 * self. _scpi_get_float(f':CHAN{source_scl}:SCAL?'):
+        if abs(level_scl) > 4 * self._get_float(f':CHAN{source_scl}:SCAL?'):
             raise AttributeError("Invalid clock level value provided!")
 
-        self._scpi_send(':TRIG:MODE SPI')
-        self._scpi_send(f':TRIG:SPI:SDA:SOUR CHAN{source_sda}')
-        self._scpi_send(f':TRIG:SPI:SCL:SOUR CHAN{source_scl}')
-        self._scpi_send(f':TRIG:SPI:SCK {'R' if clock_edge else 'F'}')
-        self._scpi_send(f':TRIG:SPI:WID {width}')
-        self._scpi_send(f':TRIG:SPI:DATA {data}')
-        self._scpi_send(f':TRIG:SPI:MASK {mask}')
-        self._scpi_send(f':TRIG:SPI:ALEV {level_scl}')
-        self._scpi_send(f':TRIG:SPI:BLEV {level_sda}')
+        self._send(':TRIG:MODE SPI')
+        self._send(f':TRIG:SPI:SDA:SOUR CHAN{source_sda}')
+        self._send(f':TRIG:SPI:SCL:SOUR CHAN{source_scl}')
+        self._send(f':TRIG:SPI:SCK {'R' if clock_edge else 'F'}')
+        self._send(f':TRIG:SPI:WID {width}')
+        self._send(f':TRIG:SPI:DATA {data}')
+        self._send(f':TRIG:SPI:MASK {mask}')
+        self._send(f':TRIG:SPI:ALEV {level_scl}')
+        self._send(f':TRIG:SPI:BLEV {level_sda}')
 
     def trigger_conf_i2c(self, source_sda: int = 1, source_scl: int = 2, level_sda: float = 0, level_scl: float = 0, address: int = 0x3f, data: int = 0xff, data_index: int = 0, condition: str = "START") -> None:
         """
@@ -599,21 +579,21 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if condition not in ["START", "STOP", "ACK_LOST", "ADDR_NO_ACK", "RESTART", "READ_DATA"]:
             raise AttributeError("Invalid condition value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if level_sda > 4 * self._scpi_get_float(f':CHAN{source_sda}:SCAL?'):
+        if level_sda > 4 * self._get_float(f':CHAN{source_sda}:SCAL?'):
             raise AttributeError("Invalid data level value provided!")
-        if level_scl > 4 * self._scpi_get_float(f':CAN{source_scl}:SCAL?'):
+        if level_scl > 4 * self._get_float(f':CAN{source_scl}:SCAL?'):
             raise AttributeError("Invalid clock level value provided!")
 
-        self._scpi_send(':TRIG:MODE IIC')
-        self._scpi_send(f':TRIG:IIC:SDA:SOUR CHAN{source_sda}')
-        self._scpi_send(f':TRIG:IIC:SCL:SOUR CHAN{source_scl}')
-        self._scpi_send(f':TRIG:IIC:CON {condition}')
-        self._scpi_send(f':TRIG:IIC:ALEV {level_scl}')
-        self._scpi_send(f':TRIG:IIC:BLEV {level_sda}')
+        self._send(':TRIG:MODE IIC')
+        self._send(f':TRIG:IIC:SDA:SOUR CHAN{source_sda}')
+        self._send(f':TRIG:IIC:SCL:SOUR CHAN{source_scl}')
+        self._send(f':TRIG:IIC:CON {condition}')
+        self._send(f':TRIG:IIC:ALEV {level_scl}')
+        self._send(f':TRIG:IIC:BLEV {level_sda}')
         if condition in ["ADDR_NO_ACK", "READ_DATA"]:
-            self._scpi_send(f':TRIG:IIC:ADD {address}')
+            self._send(f':TRIG:IIC:ADD {address}')
         if condition == "READ_DATA":
-            self._scpi_send(f':TRIG:IIC:DATA {data_index},{data}')
+            self._send(f':TRIG:IIC:DATA {data_index},{data}')
 
     def trigger_conf_can(self, source: int = 1, level: float = 0, baud_rate: int = 125000, idle: bool = True, identifier: int = 0, data_len: int = 0, data: int = 0xff, data_index: int = 0, condition: str = "FRAM_STARE") -> None:
         """
@@ -647,18 +627,18 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if condition not in ["FRAM_STARE", "FRAM_REMO_ID", "FRAM_DATA_ID", "REMO", "DATA", "FRAM_REMO_ID_EXT", "FRAM_REE", "FRAM_OVERLOAD", "ERR_ALL", "ACK_ERR"]:
             raise AttributeError("Invalid condition value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(':TRIG:MODE CAN')
-        self._scpi_send(f':TRIG:CAN:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:CAN:IDL {'HIGH' if idle else 'LOW'}')
-        self._scpi_send(f':TRIG:CAN:BAU {'USER' if baud_rate == 0 else baud_rate}')
-        self._scpi_send(f':TRIG:CAN:CON {condition}')
-        self._scpi_send(f':TRIG:CAN:ID {identifier}')
-        self._scpi_send(f':TRIG:CAN:DLC {data_len}')
-        self._scpi_send(f':TRIG:CAN:DATA {data_index},{data}')
-        self._scpi_send(f':TRIG:CAN:ALEV {level}')
+        self._send(':TRIG:MODE CAN')
+        self._send(f':TRIG:CAN:SOUR CHAN{source}')
+        self._send(f':TRIG:CAN:IDL {'HIGH' if idle else 'LOW'}')
+        self._send(f':TRIG:CAN:BAU {'USER' if baud_rate == 0 else baud_rate}')
+        self._send(f':TRIG:CAN:CON {condition}')
+        self._send(f':TRIG:CAN:ID {identifier}')
+        self._send(f':TRIG:CAN:DLC {data_len}')
+        self._send(f':TRIG:CAN:DATA {data_index},{data}')
+        self._send(f':TRIG:CAN:ALEV {level}')
 
     def trigger_conf_lin(self, source: int = 1, level: float = 0, baud_rate: int = 115200, idle: bool = True, identifier: int = 0, data: int = 0xff, data_index: int = 0, condition: str = "IDENTIFIER") -> None:
         """
@@ -689,17 +669,17 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if condition not in ["INTERVAL_FIELD", "SYNC_FIELD", "ID_FIELD", "DATA", "IDENTIFIER", "ID_DATA"]:
             raise AttributeError("Invalid condition value provided!")
         # Check this last so we don't waste time if any of the other values are invalid
-        if abs(level) > 4 * self._scpi_get_float(f':CHAN{source}:SCAL?'):
+        if abs(level) > 4 * self._get_float(f':CHAN{source}:SCAL?'):
             raise AttributeError("Invalid level value provided!")
 
-        self._scpi_send(':TRIG:MODE LIN')
-        self._scpi_send(f':TRIG:LIN:SOUR CHAN{source}')
-        self._scpi_send(f':TRIG:LIN:IDL {'HIGH' if idle else 'LOW'}')
-        self._scpi_send(f':TRIG:LIN:BAU {'USER' if baud_rate == 0 else baud_rate}')
-        self._scpi_send(f':TRIG:LIN:CON {condition}')
-        self._scpi_send(f':TRIG:LIN:ID {identifier}')
-        self._scpi_send(f':TRIG:LIN:DATA {data_index},{data}')
-        self._scpi_send(f':TRIG:LIN:ALEV {level}')
+        self._send(':TRIG:MODE LIN')
+        self._send(f':TRIG:LIN:SOUR CHAN{source}')
+        self._send(f':TRIG:LIN:IDL {'HIGH' if idle else 'LOW'}')
+        self._send(f':TRIG:LIN:BAU {'USER' if baud_rate == 0 else baud_rate}')
+        self._send(f':TRIG:LIN:CON {condition}')
+        self._send(f':TRIG:LIN:ID {identifier}')
+        self._send(f':TRIG:LIN:DATA {data_index},{data}')
+        self._send(f':TRIG:LIN:ALEV {level}')
 
     def get_waveform(self, points: int = 4000, mode: str = "HRES", samples: int = 4) -> list[float]:
         """
@@ -720,13 +700,13 @@ class DSO2D15(oscilloscope.Oscilloscope):
         if samples not in [4, 8, 16, 32, 64, 128]:
             raise AttributeError("Provided samples value is invalid!")
 
-        self._scpi_send(':CHAN1:DISP 1') # Make sure channel 1 is enabled (we don't care about the status of channel 2)
-        self._scpi_send(f':ACQ:POIN {points}')
-        self._scpi_send(f':ACQ:TYPE {mode}')
+        self._send(':CHAN1:DISP 1') # Make sure channel 1 is enabled (we don't care about the status of channel 2)
+        self._send(f':ACQ:POIN {points}')
+        self._send(f':ACQ:TYPE {mode}')
         if mode == "AVER":
-            self._scpi_send(f':ACQ:COUN {samples}')
+            self._send(f':ACQ:COUN {samples}')
 
-        data: str = self._scpi_get_str(':WAV:DATA:ALL?', 128) # Query header
+        data: str = self._get_str(':WAV:DATA:ALL?') # Query header
         if data[:2] != "#9":
             raise RuntimeError("Response header is corrupted or invalid!")
         offset = float(data[31:35])
@@ -735,8 +715,8 @@ class DSO2D15(oscilloscope.Oscilloscope):
         channel_counter = points
         out: list[float] = []
         while counter > 0:
-            data: str = self._scpi_get_bytes(':WAV:DATA:ALL?', 4029)
-            if data[:2] != b'#9':
+            data: str = self._get_str(':WAV:DATA:ALL?')
+            if data[:2] != "#9":
                 raise RuntimeError("Response header is corrupted or invalid!")
             packet_size = int(data[2:11])
             counter -= packet_size
@@ -786,22 +766,22 @@ class DSO2D15(oscilloscope.Oscilloscope):
             raise AttributeError("Invalid modulation depth value provided!")
 
         if freq == 0 or amp == 0:
-            self._scpi_send(':DDS:SWIT 0')
+            self._send(':DDS:SWIT 0')
             return
 
-        self._scpi_send(':DDS:SWIT 1')
-        self._scpi_send(f':DDS:TYPE {typ}')
-        self._scpi_send(f':DDS:FREQ {freq}')
-        self._scpi_send(f':DDS:AMP {amp}')
-        self._scpi_send(f':DDS:OFFS {offset}')
-        self._scpi_send(f':DDS:DUTY {duty}')
+        self._send(':DDS:SWIT 1')
+        self._send(f':DDS:TYPE {typ}')
+        self._send(f':DDS:FREQ {freq}')
+        self._send(f':DDS:AMP {amp}')
+        self._send(f':DDS:OFFS {offset}')
+        self.i_send(f':DDS:DUTY {duty}')
 
         if mod == "NONE":
-            self._scpi_send(':DDS:WAVE:MODE 0')
+            self._send(':DDS:WAVE:MODE 0')
             return
 
-        self._scpi_send(':DDS:WAVE:MODE 1')
-        self._scpi_send(f':DDS:MODE:TYPE {mod}')
-        self._scpi_send(f':DDS:MODE:WAVE:TYPE {mod_typ}')
-        self._scpi_send(f':DDS:MODE:FREQ {mod_freq}')
-        self._scpi_send(f':DDS:MODE:DEPT {mod_depth}')
+        self._send(':DDS:WAVE:MODE 1')
+        self._send(f':DDS:MODE:TYPE {mod}')
+        self._send(f':DDS:MODE:WAVE:TYPE {mod_typ}')
+        self._send(f':DDS:MODE:FREQ {mod_freq}')
+        self._send(f':DDS:MODE:DEPT {mod_depth}')

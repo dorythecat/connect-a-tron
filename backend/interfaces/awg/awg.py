@@ -1,11 +1,16 @@
+import subprocess
+
 class AWG:
     def __init__(self, port: str) -> None:
         self._port: str = port
 
-        self._conn = open(port, "r+b", buffering=0) # Open serial communication as a file
+    # Helper functions to communicate with the device
+    def _send(self, command: str) -> None:
+        subprocess.Popen(f'echo "{command}" > {self._port}', shell=True).wait()
 
-    def __del__(self) -> None:
-        return self._conn.close() # Close the connection properly once we're done
+    def _get_str(self, command: str) -> str:
+        self._send(command)
+        return subprocess.check_output(f'cat {self._port}', shell=True, text=True)
 
     @property
     def port(self) -> str:

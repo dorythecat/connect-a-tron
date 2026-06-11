@@ -31,17 +31,6 @@ class FY3200S(awg.AWG):
     def __init__(self, port: str = "/dev/ttyUSB0") -> None:
         super().__init__(port)
 
-    def __del__(self) -> None:
-        super().__del__()
-
-    # Helper functions for the connection, meant only for internal use
-    def _send(self, command: str) -> None:
-        os.system(f'echo "{command}" > {self._port}')
-
-    def _get_str(self, command: str) -> str:
-        self._send(command)
-        return subprocess.check_output(f'cat {self._port}', shell=True, text=True)
-
     @property
     def id(self) -> str:
         return self._get_str("a")

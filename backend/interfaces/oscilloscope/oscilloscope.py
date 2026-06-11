@@ -1,11 +1,19 @@
+import subprocess
+
 class Oscilloscope:
     def __init__(self, port: str) -> None:
         self._port: str = port
 
-        self._conn = open(port, "r+b", buffering=0) # We open the serial communication as a file
+    # Helper functions to communicate with the device
+    def _send(self, command: str) -> None:
+        subprocess.Popen(f'echo "{command}" > {self._port}', shell=True).wait()
 
-    def __del__(self) -> None:
-        self._conn.close() # Close the file properly once we're done
+    def _get_str(self, command: str) -> str:
+        self._send(command)
+        return subprocess.check_output(f'cat {self._port}', shell=True, text=True)
+
+    def _get_float(self, command: str) -> float:
+        return float(self._get_str(command))
 
     @property
     def port(self) -> str:
