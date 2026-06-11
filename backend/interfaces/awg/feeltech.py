@@ -1,3 +1,4 @@
+import os, subprocess
 from enum import Enum
 
 import interfaces.awg.awg as awg
@@ -35,15 +36,15 @@ class FY3200S(awg.AWG):
 
     # Helper functions for the connection, meant only for internal use
     def _send(self, command: str) -> None:
-        self._conn.write(command.encode('unicode_escape'))
+        os.system(f'echo "{command}" > {self._port}')
 
-    def _get_str(self, command: str, size: int = 64) -> str:
-        self._conn.write(command.encode('unicode_escape'))
-        return self._conn.read(size).decode('unicode_escape')
+    def _get_str(self, command: str) -> str:
+        self._send(command)
+        return subprocess.check_output(f'cat {self._port}', shell=True, text=True)
 
     @property
     def id(self) -> str:
-        return _get_str("a")
+        return self._get_str("a")
 
     def set_waveform(self, channel: int = 1, freq: float = 1000, amp: float = 1, offset: float = 0, duty: float = 50, typ: WaveType = WaveType.SINE, phase: int = 0) -> None:
         """
@@ -74,7 +75,7 @@ class FY3200S(awg.AWG):
             raise AttributeError("Invalid phase value provided!")
 
         chan = "b" if channel == 1 else "d" # Channel select letter
-        self._send(f'{chan}f{freq}')
+        self._send(f'{chan}f{int(freq * 100)}') # AWG expects frequency in cHz, NOT Hz
         self._send(f'{chan}a{amp}')
         self._send(f'{chan}o{offset}')
         self._send(f'{chan}d{duty}')
