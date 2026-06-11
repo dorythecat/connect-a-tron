@@ -753,9 +753,9 @@ class DSO2D15(oscilloscope.Oscilloscope):
         """
         Sets the waveform for the arbitrary waveform generator to produce.
 
-        :param freq: Frequency of the desired wave, in hertz. (0.1 <= freq <= 25000000) (0 will turn the generator off)
-        :param amp: Amplitude of the desired wave, in volts. (0.01 <= amp <= 7) (0 will turn the generator off)
-        :param offset: Offset of the desired wave, in volts. (-3 <= offset <= 3)
+        :param freq: Frequency of the desired wave, in Hertzs. (0.1 <= freq <= 25000000) (0 will turn the generator off)
+        :param amp: Amplitude of the desired wave, in Volts. (0.01 <= amp <= 7) (0 will turn the generator off)
+        :param offset: Offset of the desired wave, in Volts. (abs(offset) <= 3)
         :param typ: Type of the desired wave. ("SINE", "SQUA", "RAMP", "EXP", "NOIS", "DC", "ARB1", "ARB2", "ARB3", "ARB4")
         :param duty: Duty cycle of the desired wave, in percentage (0 <= duty <= 99)
         :param mod: The type of modulation to apply to the signal ("NONE", "AM", or "FM")
@@ -764,13 +764,13 @@ class DSO2D15(oscilloscope.Oscilloscope):
         :param mod_depth: In AM modulation, this value is the modulation depth (0 <= mod_depth <= 100), while in FM modulation, this value is the modulation deviation (100 <= mod_depth <= 10000)
 
         :returns: Nothing.
-        :raises AttributeError: If any of the provided values is invalid.
+        :raises AttributeError: If any of the provided values are invalid.
         """
         if freq != 0 and not 0.1 <= freq <= 25000000:
             raise AttributeError("Invalid frequency value provided!")
         if amp != 0 and not 0.01 <= amp <= 7:
             raise AttributeError("Invalid amplitude value provided!")
-        if not -3 <= offset <= 3:
+        if abs(offset) > 3:
             raise AttributeError("Invalid offset value provided!")
         if typ not in ["SINE", "SQUA", "RAMP", "EXP", "NOIS", "DC", "ARB1", "ARB2", "ARB3", "ARB4"]:
             raise AttributeError("Invalid type value provided!")
