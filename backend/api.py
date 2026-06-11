@@ -12,6 +12,8 @@ import interfaces.dmm.keithley as keithley
 
 import interfaces.oscilloscope.hantek as hantek
 
+import interfaces.awg.feeltech as feeltech
+
 app = FastAPI(
     title="Connect-a-tron API",
     summary="API for Connect-a-tron web service",
@@ -26,11 +28,15 @@ app = FastAPI(
         },
         {
             "name": "DMM",
-            "description": "A DMM, or digital multimeter, is a device that can measure various values on a circuit, like voltage, current, and resistance, amongst others."
+            "description": "A DMM, or Digital MultiMeter, is a device that can measure various values on a circuit, like voltage, current, and resistance, amongst others."
         },
         {
             "name": "Oscilloscope",
             "description": "An oscilloscope is a device that can sample voltages at a fast enough rate and with enough accuraccy as to allow viewing the waveforms of said voltage."
+        },
+        {
+            "name": "AWG",
+            "description": "An AWG, or Arbitrary Waveform Generator, is a device that can generate a voltage or current wave, with defined, repeatable parameters."
         }
     ],
     license_info={
@@ -39,11 +45,9 @@ app = FastAPI(
     }
 )
 
-origins = ["*"]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,18 +56,22 @@ app.add_middleware(
 with open("settings.json", "r") as f:
     settings = json.load(f)
 
+# TODO: If an interface is disabled, return a 404 error when using its endpoints
+keithley2000 = None
 if "keithley2000" in settings and "enabled" in settings["keithley2000"] and settings["keithley2000"]["enabled"]:
     port = settings["keithley2000"]["port"] if "port" in settings["keithley2000"] else "/dev/ttyUSB0"
     baud_rate = settings["keithley2000"]["baud_rate"] if "baud_rate" in settings["keithley2000"] else 9600
     keithley2000 = keithley.Keithley2000(port, baud_rate)
-else:
-    keithley2000 = None
 
+hantek_dso2d15 = None
 if "hantek_dso2d15" in settings and "enabled" in settings["hantek_dso2d15"] and settings["hantek_dso2d15"]["enabled"]:
     port = settings["hantek_dso2d15"]["port"] if "port" in settings["hantek_dso2d15"] else "/dev/usbtmc0"
     hantek_dso2d15 = hantek.DSO2D15(port)
-else:
-    hantek_dso2d15 = None
+
+feeltech_fy3200s = None
+if "feeltech_fy3200s" in settings and "enabled" in settings["feeltech_fy3200s"] and settings["feeltech_fy3200s"]["enabled"]:
+    port = settings["feeltech_fy3200s"]["port"] if "port" in settings["feeltech_fy3200s"] else "/dev/ttyUSB0"
+    feeltech_fy3200s = feeltech.FY3200S(port)
 
 @app.get("/system/interfaces", tags=["System"])
 async def interfaces() -> dict:
@@ -72,12 +80,15 @@ async def interfaces() -> dict:
     """
     interfaces = {
         "dmm": [],
-        "oscilloscope": []
+        "oscilloscope": [],
+        "awg": []
     }
     if keithley2000 is not None:
         interfaces["dmm"].append("keithley2000")
     if hantek_dso2d15 is not None:
         interfaces["oscilloscope"].append("hantek_dso2d15")
+    if feeltech_fy3200s is not None:
+        interfaces["awg"].append("feeltech_fy3200s")
     return interfaces
 
 # Keithley 2000
@@ -168,7 +179,7 @@ async def hantek_dso2d15_id() -> str:
 
 # TODO(maybe): Support more trigger modes than just EDGE
 class HantekDSO2D15GetWaveform(BaseModel):
-    channel: Annotated[Literal[1], BeforeValidator(int), Query(title="Channel to read waveform from")] = 1 # TODO: Support channel 2
+    channel: Annotated[Literal[1], BeforeValidator(int), Query(title="Channel to read waveform from")] = 1 # TODO: Support channel 2 to the command you want to execute. (can't test if there are other things that do not work...)
     probe: Annotated[Literal[1, 10, 50, 100], BeforeValidator(int), Query(title="Attenuation factor of the connected probe")] = 1
     volt_scale: Annotated[float, Query(title="Vertiroot_validator not definedcal scale of the measurement, in volts per division", ge=0.001, le=1000)] = 1
     volt_offset: Annotated[float, Query(title="Voltage offset from the ground point, in Volts")] = 0
@@ -257,3 +268,22 @@ def hantek_dso2d15_rms(channel: Annotated[Literal[1, 2], BeforeValidator(int)] =
 @app.get("/oscilloscope/hantek_dso2d15/ppk", tags=["Oscilloscope"])
 def hantek_dso2d15_ppk(channel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
     return hantek_dso2d15.ppk(channel)
+
+@app.get("/awg/feeltech_fy3200s", tags=["AWG"])
+def feeltech_fy3200s_id() -> str:
+    return feeltech_fy3200s.id
+
+class FeelTechFY3200SSetWaveform(BaseModel):
+    channel: Annotated[Literal[1, 2], BeforeValidator(int), Query("Channel of the generator to set")] = 1
+    freq: Annotated[float, Query("Frequency of the desired wave, in Hertzs", ge=0.01, le=20000000)] = 1000
+    amp: Annotated[float, Query("Amplitude of the desired wave, in Volts", ge=0.01, le=20)] = 1
+    offset: Annotated[float, Query("Offset of the desired wave, in Volts", ge=-10, le=10)] = 0
+    duty: Annotated[float, Query("Duty cycle of the desired wave, in percentage", ge=0.01, le=99.9)] = 50
+    typ: Annotated[int, Query("Type of the desired wave", ge=0, le=19)] = 0
+    phase: Annotated[int, Query("Phase offset of the desired wave", ge=0, le=359)] = 0
+
+@app.post("/awg/feeltech_fy3200s/waveform", tags=["AWG"])
+def feeltech_fy3200s_set(data: FeelTechFY3200SSetWaveform = Depends()) -> None:
+    feeltech_fy3200s.set_waveform(
+        data.channel, data.freq, data.amp, data.offset, data.duty, feeltech.WaveType(data.typ), data.phase
+    )

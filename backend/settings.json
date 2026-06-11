@@ -5,7 +5,11 @@
     "baud_rate": 9600
   },
   "hantek_dso2d15": {
-    "enabled": true,
+    "enabled": false,
     "port": "/dev/usbtmc0"
+  },
+  "feeltech_fy3200s": {
+    "enabled": true,
+    "port": "/dev/ttyUSB0"
   }
 }
