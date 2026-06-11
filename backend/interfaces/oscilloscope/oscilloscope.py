@@ -12,6 +12,10 @@ class Oscilloscope:
         return self._port
 
     @property
+    def id(self) -> str:
+        return "Generic Oscilloscope"
+
+    @property
     def keypad_lock(self) -> bool:
         raise True # Default value, since most oscilloscopes will have their keypad locked by default
 
