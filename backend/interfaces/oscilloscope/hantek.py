@@ -10,7 +10,7 @@ class DSO2D15(oscilloscope.Oscilloscope):
     # Helper functions for the serial connection
     # These don't have any protections or description because they're only meant for internal use
     def _scpi_send(self, command: str) -> None:
-        self._conn.write(f'{command}'.encode('unicode_escape'))
+        self._conn.write(command.encode('unicode_escape'))
 
     def _scpi_get_bytes(self, command: str, size: int = 4096) -> bytes:
         self._conn.write(command.encode('unicode_escape'))
