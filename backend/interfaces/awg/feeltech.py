@@ -2,13 +2,15 @@ from enum import Enum
 
 import interfaces.awg.awg as awg
 
+# See https://www.eevblog.com/forum/testgear/feeltech-fy3224s-24mhz-2-channel-dds-aw-function-signal-generator/msg708434/?topicseen#msg708434 for more information on commands for this AWG
+
 class WaveType(Enum):
-    SINE  = 0
-    SQUR  = 1
-    TRGL  = 2
-    STW   = 3
-    NSTW  = 4
-    DC    = 5
+    SINE  = 0  # Sinusoidal
+    SQUR  = 1  # Square
+    TRGL  = 2  # Triangle
+    STW   = 3  # Sawtooth
+    NSTW  = 4  # Inverted sawtooth
+    DC    = 5  # Offset value determines the DC voltage
     PRE1  = 6  # Lorentz pulse
     PRE2  = 7  # Multitonal
     PRE3  = 8  # Periodic random noise
@@ -19,10 +21,10 @@ class WaveType(Enum):
     PRE8  = 13 # Gaussian white noise
     PRE9  = 14 # Amplitude Modulated (AM)
     PRE10 = 15 # Frequency Modulated (FM)
-    ARB1  = 16
-    ARB2  = 17
-    ARB3  = 18
-    ARB4  = 19
+    ARB1  = 16 # Arbitrary waveform 1
+    ARB2  = 17 # Arbitrary waveform 2
+    ARB3  = 18 # Arbitrary waveform 3
+    ARB4  = 19 # Arbitrary waveform 4
 
 class FY3200S(awg.AWG):
     def __init__(self, port: str = "/dev/ttyUSB0") -> None:
