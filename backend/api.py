@@ -120,7 +120,7 @@ async def keithley2000_measure(data: Keithley2000Measure = Depends()) -> float:
         data.digits,
         data.thr,
         data.bandwidth,
-        data.ttype.value,
+        data.ttype,
         data.tref,
         data.simtemp,
         data.tcoef,
