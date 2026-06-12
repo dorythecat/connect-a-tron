@@ -33,3 +33,6 @@ There is also the very inviting offer of doing some "joint measurements", that i
 There is (currently) one settings file, which you can find as `backend/settings.json`. This file contains definitions for the settings of what devices are available internally. That is, the devices that are physically connected to the device that is running the backend.
 
 Every device supported is included on the file. You can deactivate any of these devices by either removing that section, or setting the value of their `enabled` value to `false`. All devices have the `port` setting, which indicates which port of the machine the device is connected to.
+
+# Testing it out
+You can test out the web at http://89.141.111.112:8001 and the API at http://89.141.111.112:8000
