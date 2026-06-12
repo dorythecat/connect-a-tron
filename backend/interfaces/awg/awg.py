@@ -26,7 +26,7 @@ class AWG:
     def set_waveform(self, channel: int, freq: float, amp: float, offset: float, duty: int) -> None:
         raise NotImplementedError
 
-    def set_fsweep(self, channel: int, start_freq: float, stop_freq: float, time: float, typ: int) -> None:
+    def set_fsweep(self, channel: int, start: float, stop: float, time: float, typ: int) -> None:
         raise NotImplementedError
 
     def start_fsweep(self, channel: int) -> None:
@@ -35,7 +35,7 @@ class AWG:
     def stop_fsweep(self, channel: int) -> None:
         raise NotImplementedError
 
-    def set_asweep(self, channel: int, start_amp: float, stop_amp: float, time: float, typ: int) -> None:
+    def set_asweep(self, channel: int, start: float, stop: float, time: float, typ: int) -> None:
         raise NotImplementedError
 
     def start_asweep(self, channel: int) -> None:

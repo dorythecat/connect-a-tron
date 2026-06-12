@@ -71,13 +71,13 @@ class FY3200S(awg.AWG):
         self._send(f'{chan}w{typ.value}')
         self._send(f'{chan}p{phase}')
 
-    def set_fsweep(self, channel: int = 1, start_freq: float = 0, stop_freq: float = 1000, time: int = 10, typ: int = 1) -> None:
+    def set_fsweep(self, channel: int = 1, start: float = 0, stop: float = 1000, time: int = 10, typ: int = 1) -> None:
         """
         Configures a frequency sweep.
 
         :param channel: Channel to configure the sweep for. (Only channel 1 supported)
-        :param start_freq: Starting frequency, in Hertzs. (0.01 <= start_freq <= 20000000 or start_freq = 0)
-        :param stop_freq: Stopping frequency, in Hertzs. (0.01 <= stop_freq <= 20000000 or stop_freq = 0)
+        :param start: Starting frequency, in Hertzs. (0.01 <= start_freq <= 20000000 or start_freq = 0)
+        :param stop: Stopping frequency, in Hertzs. (0.01 <= stop_freq <= 20000000 or stop_freq = 0)
         :param time: Time the sweep should take, in seconds. (1 <= time <= 99)
         :param typ: Type of sweep. 1 means linear, 2 means logarithmic.
 
@@ -86,17 +86,17 @@ class FY3200S(awg.AWG):
         """
         if channel != 1:
             raise AttributeError("Invalid channel provided!")
-        if start_freq != 0 and not 0.01 <= start_freq <= 20000000:
+        if start != 0 and not 0.01 <= start <= 20000000:
             raise AttributeError("Invalid starting frequency value provided!")
-        if stop_freq != 0 and not 0.01 <= stop_freq <= 20000000:
+        if stop != 0 and not 0.01 <= stop <= 20000000:
             raise AttributeError("Invalid stopping frequency value provided!")
         if not 1 <= time <= 99:
             raise AttributeError("Invalid time value provided!")
         if typ not in [1, 2]:
             raise AttributeError("Invalid type value provided!")
 
-        self._send(f'br1\nbf{int(start_freq * 100)}')
-        self._send(f'bs1\nbf{int(stop_freq * 100)}')
+        self._send(f'br1\nbf{int(start * 100)}')
+        self._send(f'bs1\nbf{int(stop * 100)}')
         self._send(f'bt{time}')
         self._send(f'bm{typ}')
 

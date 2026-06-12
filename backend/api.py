@@ -275,8 +275,8 @@ def feeltech_fy3200s_id() -> str:
 
 class FeelTechFY3200SSetWaveform(BaseModel):
     channel: Annotated[Literal[1, 2], BeforeValidator(int), Query("Channel of the generator to set")] = 1
-    freq: Annotated[float, Query("Frequency of the desired wave, in Hertzs", ge=0.01, le=20000000)] = 1000
-    amp: Annotated[float, Query("Amplitude of the desired wave, in Volts", ge=0.01, le=20)] = 1
+    freq: Annotated[float, Query("Frequency of the desired wave, in Hertzs", ge=0, le=20000000)] = 1000
+    amp: Annotated[float, Query("Amplitude of the desired wave, in Volts", ge=0, le=20)] = 1
     offset: Annotated[float, Query("Offset of the desired wave, in Volts", ge=-10, le=10)] = 0
     duty: Annotated[float, Query("Duty cycle of the desired wave, in percentage", ge=0.01, le=99.9)] = 50
     typ: Annotated[int, Query("Type of the desired wave", ge=0, le=19)] = 0
@@ -287,3 +287,18 @@ def feeltech_fy3200s_set(data: FeelTechFY3200SSetWaveform = Depends()) -> None:
     feeltech_fy3200s.set_waveform(
         data.channel, data.freq, data.amp, data.offset, data.duty, feeltech.WaveType(data.typ), data.phase
     )
+
+class FeelTechFY3200SFSweep(BaseModel):
+    active: Annotated[bool, Query("Wether to start (True) or stop (False) the sweep")] = False
+    start: Annotated[float, Query("Starting frequency of the sweep, in Hertzs", ge=0, le=20000000)] = 0
+    stop: Annotated[float, Query("Stopping frequency of the sweep, in Hertzs", ge=0, le=20000000)] = 1000
+    time: Annotated[int, Query("Time the sweep should take, in seconds", ge=1, le=99)] = 10
+    typ: Annotated[Literal[1, 2], BeforeValidator(int), Query("Wether to make a linear (1) or logarithmic (2) sweep")] = 1
+
+@app.post("/awg/feeltech_fy3200s/fsweep", tags=["AWG"])
+def feeltech_fy3200s_sweep(data: FeelTechFY3200SFSweep = Depends()) -> None:
+    feeltech_fy3200s.set_fsweep(1, data.start, data.stop, data.time, data.typ)
+    if data.active:
+        feeltech_fy3200s.start_fsweep()
+    else:
+        feeltech_fy3200s.stop_fsweep()
