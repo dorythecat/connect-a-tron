@@ -11,6 +11,8 @@ $context = stream_context_create([
   ]
 ]);
 
+chdir(dirname(__FILE__)); // Ensure proper working directory
+
 try {
   $response = (array) json_decode(file_get_contents($url, false, $context));
 
