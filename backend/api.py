@@ -20,7 +20,7 @@ app = FastAPI(
     description="""
     Connect-a-tron is a framework that links up all of your lab and test equipment, and interfaces with it, abstracting away all of the complicated and messy setup, all for a smooth user experience.
     """,
-    version="0.0.0",
+    version="0.1.0",
     openapi_tags=[
         {
             "name": "System",
