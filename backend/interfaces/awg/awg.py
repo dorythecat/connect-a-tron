@@ -12,6 +12,9 @@ class AWG:
         self._send(command)
         return subprocess.check_output(f'cat {self._port}', shell=True, text=True)
 
+    def _get_float(self, command: str) -> float:
+        return float(self._get_str(command))
+
     @property
     def port(self) -> str:
         return self._port
@@ -21,4 +24,22 @@ class AWG:
         return "Generic AWG"
 
     def set_waveform(self, channel: int, freq: float, amp: float, offset: float, duty: int) -> None:
+        raise NotImplementedError
+
+    def set_fsweep(self, channel: int, start_freq: float, stop_freq: float, time: float, typ: int) -> None:
+        raise NotImplementedError
+
+    def start_fsweep(self, channel: int) -> None:
+        raise NotImplementedError
+
+    def stop_fsweep(self, channel: int) -> None:
+        raise NotImplementedError
+
+    def set_asweep(self, channel: int, start_amp: float, stop_amp: float, time: float, typ: int) -> None:
+        raise NotImplementedError
+
+    def start_asweep(self, channel: int) -> None:
+        raise NotImplementedError
+
+    def stop_asweep(self, channel: int) -> None:
         raise NotImplementedError

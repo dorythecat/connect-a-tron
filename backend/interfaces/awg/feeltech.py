@@ -3,7 +3,7 @@ from enum import Enum
 
 import interfaces.awg.awg as awg
 
-# See https://www.eevblog.com/forum/testgear/feeltech-fy3224s-24mhz-2-channel-dds-aw-function-signal-generator/msg708434/?topicseen#msg708434 for more information on commands for this AWG
+# See https://www.eevblog.com/forum/testgear/feeltech-fy3224s-24mhz-2-channel-dds-aw-function-signal-generator/msg708652/#msg708652 for more information on commands for this AWG
 
 class WaveType(Enum):
     SINE  = 0  # Sinusoidal
@@ -70,3 +70,60 @@ class FY3200S(awg.AWG):
         self._send(f'{chan}d{duty}')
         self._send(f'{chan}w{typ.value}')
         self._send(f'{chan}p{phase}')
+
+    def set_fsweep(self, channel: int = 1, start_freq: float = 0, stop_freq: float = 1000, time: int = 10, typ: int = 1) -> None:
+        """
+        Configures a frequency sweep.
+
+        :param channel: Channel to configure the sweep for. (Only channel 1 supported)
+        :param start_freq: Starting frequency, in Hertzs. (0.01 <= start_freq <= 20000000 or start_freq = 0)
+        :param stop_freq: Stopping frequency, in Hertzs. (0.01 <= stop_freq <= 20000000 or stop_freq = 0)
+        :param time: Time the sweep should take, in seconds. (1 <= time <= 99)
+        :param typ: Type of sweep. 1 means linear, 2 means logarithmic.
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if channel != 1:
+            raise AttributeError("Invalid channel provided!")
+        if start_freq != 0 and not 0.01 <= start_freq <= 20000000:
+            raise AttributeError("Invalid starting frequency value provided!")
+        if stop_freq != 0 and not 0.01 <= stop_freq <= 20000000:
+            raise AttributeError("Invalid stopping frequency value provided!")
+        if not 1 <= time <= 99:
+            raise AttributeError("Invalid time value provided!")
+        if typ not in [1, 2]:
+            raise AttributeError("Invalid type value provided!")
+
+        self._send(f'br1\nbf{int(start_freq * 100)}')
+        self._send(f'bs1\nbf{int(stop_freq * 100)}')
+        self._send(f'bt{time}')
+        self._send(f'bm{typ}')
+
+    def start_fsweep(self, channel: int = 1) -> None:
+        """
+        Starts a frequency sweep.
+
+        :param channel: Channel to sweep on. (Only channel 1 supported)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if channel != 1:
+            raise AttributeError("Invalid channel provided!")
+
+        self._send("br1")
+
+    def stop_fsweep(self, channel: int = 1) -> None:
+        """
+        Stops a frequency sweep.
+
+        :param channel: Channel to stop sweeping on. (Only channel 1 supported)
+
+        :returns: Nothing.
+        :raises AttributeError: If any of the provided values are invalid.
+        """
+        if channel != 1:
+            raise AttributeError("Invalid channel provided!")
+
+        self._send("br0")
