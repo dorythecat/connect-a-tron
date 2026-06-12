@@ -11,8 +11,6 @@ $context = stream_context_create([
   ]
 ]);
 
-chdir(dirname(__FILE__)); // Ensure proper working directory
-
 try {
   $response = (array) json_decode(file_get_contents($url, false, $context));
 
@@ -270,4 +268,6 @@ else echo '<div class="instrument" style="display:none" id="hantek_dso2d15">';
 <?php
 if ($keithley2000_enable) echo '<script src="scripts/keithley2000.js"></script>';
 if ($hantek_dso2d15_enable) echo '<script src="scripts/hantek_dso2d15.js"></script>';
+?>
+
 </html>
