@@ -64,6 +64,11 @@ class Keithley2000(dmm.DMM):
 
     @property
     def input(self) -> bool:
+        """
+        What side of the multimeter we're using as an input.
+
+        :returns: True if frontal inputs are active, False if back inputs are active.
+        """
         self._ser.write(b':SYST:FRSW?\n')
         return bool(int(self._ser.readline().decode()))
 
@@ -83,7 +88,7 @@ class Keithley2000(dmm.DMM):
 
     @key_press.setter
     def key_press(self, value: int) -> None:
-        if value < 1 or value > 32:
+        if not 1 <= value <= 32 or value in [9, 10, 25]:
             raise AttributeError("Invalid key number provided!")
         self._ser.write(f':SYST:KEY {value}\n'.encode())
 
