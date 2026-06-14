@@ -61,17 +61,32 @@ keithley2000 = None
 if "keithley2000" in settings and "enabled" in settings["keithley2000"] and settings["keithley2000"]["enabled"]:
     port = settings["keithley2000"]["port"] if "port" in settings["keithley2000"] else "/dev/ttyUSB0"
     baud_rate = settings["keithley2000"]["baud_rate"] if "baud_rate" in settings["keithley2000"] else 9600
-    keithley2000 = keithley.Keithley2000(port, baud_rate)
+    try:
+        keithley2000 = keithley.Keithley2000(port, baud_rate)
+        keithley2000.id
+    except Exception as e:
+        keithley2000 = None
+        print(f'Found exception while connecting to Keithley 2000: {e}')
 
 hantek_dso2d15 = None
 if "hantek_dso2d15" in settings and "enabled" in settings["hantek_dso2d15"] and settings["hantek_dso2d15"]["enabled"]:
     port = settings["hantek_dso2d15"]["port"] if "port" in settings["hantek_dso2d15"] else "/dev/usbtmc0"
-    hantek_dso2d15 = hantek.DSO2D15(port)
+    try:
+        hantek_dso2d15 = hantek.DSO2D15(port)
+        hantek_dso2d15.id
+    except Exception as e:
+        hantek_dso2d15 = None
+        print(f'Found exception while connecting to Hantek DSO2D15: {e}')
 
 feeltech_fy3200s = None
 if "feeltech_fy3200s" in settings and "enabled" in settings["feeltech_fy3200s"] and settings["feeltech_fy3200s"]["enabled"]:
     port = settings["feeltech_fy3200s"]["port"] if "port" in settings["feeltech_fy3200s"] else "/dev/ttyUSB0"
-    feeltech_fy3200s = feeltech.FY3200S(port)
+    try:
+        feeltech_fy3200s = feeltech.FY3200S(port)
+        feeltech_fy3200s.id
+    except Exception as e:
+        feeltech_fy3200s = None
+        print(f'Found exception while connecting to FeelTech FY3200S: {e}')
 
 class Interfaces(BaseModel):
     dmm: list[str] = []
