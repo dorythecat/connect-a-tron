@@ -1,6 +1,6 @@
 import json
 
-from fastapi import FastAPI, Path, Query, Depends
+from fastapi import FastAPI, Path, Query, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, BeforeValidator, model_validator
 from typing import Annotated, Literal
@@ -73,27 +73,40 @@ if "feeltech_fy3200s" in settings and "enabled" in settings["feeltech_fy3200s"] 
     port = settings["feeltech_fy3200s"]["port"] if "port" in settings["feeltech_fy3200s"] else "/dev/ttyUSB0"
     feeltech_fy3200s = feeltech.FY3200S(port)
 
-@app.get("/system/interfaces", tags=["System"])
-async def interfaces() -> dict:
+class Interfaces(BaseModel):
+    dmm: list[str] = []
+    oscilloscope: list[str] = []
+    awg: list[str] = []
+
+@app.get("/system/interfaces",
+         summary="Get the currently available interfaces",
+         response_description="Currently available interfaces, by type",
+         tags=["System"])
+async def interfaces() -> Interfaces:
     """
     Display the available interfaces on this API.
     """
-    interfaces = {
-        "dmm": [],
-        "oscilloscope": [],
-        "awg": []
-    }
+    interfaces = Interfaces()
     if keithley2000 is not None:
-        interfaces["dmm"].append("keithley2000")
+        interfaces.dmm.append("keithley2000")
     if hantek_dso2d15 is not None:
-        interfaces["oscilloscope"].append("hantek_dso2d15")
+        interfaces.oscilloscope.append("hantek_dso2d15")
     if feeltech_fy3200s is not None:
-        interfaces["awg"].append("feeltech_fy3200s")
+        interfaces.awg.append("feeltech_fy3200s")
     return interfaces
 
 # Keithley 2000
-@app.get("/dmm/keithley2000", tags=["DMM"])
+@app.get("/dmm/keithley2000",
+         responses={
+            404: { "description": "Interface not found" }
+         },
+         summary="Get the identifier of the connected Keithley 2000 DMM",
+         response_description="Identifier of the connected Keithley 2000 DMM",
+         tags=["DMM"])
 async def keithley2000_id() -> str:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return keithley2000.id
 
 class Keithley2000Measure(BaseModel):
@@ -110,8 +123,17 @@ class Keithley2000Measure(BaseModel):
     tcoef: Annotated[float, Query(title="Real junction temperature coefficient", gt=-0.1, lt=0.1)] = 0.0002
     voff: Annotated[float, Query(title="Real junction voltage offset", gt=-0.1, lt=0.1)] = 0.05463
 
-@app.get("/dmm/keithley2000/measure/{typ}", tags=["DMM"])
+@app.get("/dmm/keithley2000/measure/{typ}",
+         responses={
+            404: { "description": "Interface not found" }
+         },
+         summary="Get a single measurement from the device, with the provided settings",
+         response_description="Measurement, as taken by the device",
+         tags=["DMM"])
 async def keithley2000_measure(data: Keithley2000Measure = Depends()) -> float:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+
     keithley2000.measure_set(
         dmm.MType(data.typ),
         data.nplc,
@@ -128,53 +150,145 @@ async def keithley2000_measure(data: Keithley2000Measure = Depends()) -> float:
     )
     return keithley2000.measure_get()
 
-@app.get("/dmm/keithley2000/input", tags=["DMM"])
+@app.get("/dmm/keithley2000/input",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the input side for the device",
+         response_description="True if front inputs are active, False if back inputs are active",
+         tags=["DMM"])
 async def keithley2000_input() -> bool:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return keithley2000.input
 
-@app.get("/dmm/keithley2000/beeper", tags=["DMM"])
+@app.get("/dmm/keithley2000/beeper",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get wether the beeper of the device is on or off",
+         response_description="True if the beeper is on, False otherwise",
+         tags=["DMM"])
 async def keithley2000_beeper() -> bool:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return keithley2000.beeper
 
-@app.post("/dmm/keithley2000/beeper", tags=["DMM"])
+@app.post("/dmm/keithley2000/beeper",
+          responses={
+              404: { "description": "Interface not found" }
+          },
+          summary="Set wether the beeper of the device is on or off",
+          tags=["DMM"])
 async def keithley2000_beeper(on: bool = False) -> None:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     keithley2000.beeper = on
 
 class DisplaySettings(BaseModel):
-    enabled: bool
-    text: str
+    enabled: Annotated[bool, Query("Wether the display is enabled (True) or not (False)")] = True
+    text: Annotated[str, Query("Text displayed on the device")] = ""
 
-@app.get("/dmm/keithley2000/display", tags=["DMM"])
+@app.get("/dmm/keithley2000/display",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get wether the display of the device is on or off, and the text being displayed on it",
+         response_description="Wether the display is on or off, and the text being displayed on it",
+         tags=["DMM"])
 async def keithley2000_display() -> DisplaySettings:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return DisplaySettings(
         enabled=keithley2000.display,
         text=keithley2000.text
     )
 
-@app.post("/dmm/keithley2000/display", tags=["DMM"])
-async def keithley2000_display(enable: bool = True, text: str = "") -> None:
-    keithley2000.display = enable
-    keithley2000.text = text
+@app.post("/dmm/keithley2000/display",
+          responses={
+              404: { "description": "Interface not found" }
+          },
+          summary="Set wether the display of the device is on or off",
+          tags=["DMM"])
+async def keithley2000_display(data: DisplaySettings = Depends()) -> None:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
 
-@app.get("/dmm/keithley2000/autozero", tags=["DMM"])
+    keithley2000.display = data.enable
+    keithley2000.text = data.text
+
+@app.get("/dmm/keithley2000/autozero",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get wether the device should automatically zero or not",
+         response_description="Wether the device should automatically zero (True) or not (False)",
+         tags=["DMM"])
 async def keithley2000_autozero() -> bool:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return keithley2000.autozero
 
-@app.post("/dmm/keihtley2000/autozero", tags=["DMM"])
+@app.post("/dmm/keihtley2000/autozero",
+          responses={
+              404: { "description": "Interface not found" }
+          },
+          summary="Set wether the device should automatically zero or not",
+          tags=["DMM"])
 async def keithley2000_autozero(on: bool = True) -> None:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     keithley2000.autozero = on
 
-@app.get("/dmm/keithley2000/key_press", tags=["DMM"])
+@app.get("/dmm/keithley2000/key_press",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the last pressed front panel key on the device",
+         description="Get the last pressed front panel key on the device, in the form of a key code, the list of which can be found in the Keithley 2000 User's Manual, in page 197, Figure 5-10",
+         response_description="Keycode of last pressed front panel key",
+         tags=["DMM"])
 async def keithley2000_key_press() -> int:
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return keithley2000.key_press
 
-@app.post("/dmm/keithley2000/key_press", tags=["DMM"])
-async def keithley2000_key_press(key: int) -> None:
+@app.post("/dmm/keithley2000/key_press",
+          responses={
+              404: { "description": "Interface not found" },
+              422: { "description": "Unknown key" }
+          },
+          summary="Simulate a key press on the device",
+          description="Simulate a key press on the device, as if one of the keys on the front panel had been pressed, according to the keycodes that can be seen on the Keithley 2000's User's Manual, page 197, Figure 5-10",
+          tags=["DMM"])
+async def keithley2000_key_press(key: int = 17) -> None: # By default, "LOCAL" key, which disables the remote connection and enables th front panel
+    if keithley2000 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
+    if not 1 <= key <= 32 or key in [9, 10, 25]:
+        raise HTTPException(status_code=422, detail="Unknown key")
+
     keithley2000.key_press = key
 
 # Hantek DSO2D15
-@app.get("/oscilloscope/hantek_dso2d15", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the identifier of this device",
+         response_description="Identifier of this device",
+         tags=["Oscilloscope"])
 async def hantek_dso2d15_id() -> str:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return hantek_dso2d15.id
 
 # TODO(maybe): Support more trigger modes than just EDGE
@@ -203,8 +317,17 @@ class HantekDSO2D15GetWaveform(BaseModel):
             raise ValueError("Trigger level out of bounds!")
         return self
 
-@app.get("/oscilloscope/hantek_dso2d15/waveform", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/waveform",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Gets a waveform readout from the device, with the specified parameters",
+         response_description="Waveform readout from the device, composed of 4000 points, measured in Volts",
+         tags=["Oscilloscope"])
 def hantek_dso2d15_get_waveform(data: HantekDSO2D15GetWaveform = Depends()) -> list[float]:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     hantek_dso2d15.channel_conf(
         channel=data.channel,
         scale=data.volt_scale,
@@ -235,42 +358,121 @@ class HantekDSO2D15SetWaveform(BaseModel):
             raise ValueError("Modulation depth out of bounds!")
         return self
 
-@app.post("/oscilloscope/hantek_dso2d15/waveform", tags=["Oscilloscope"])
+@app.post("/oscilloscope/hantek_dso2d15/waveform",
+          responses={
+              404: { "description": "Interface not found" }
+          },
+          summary="Set a waeform for the arbitrary waveform generator of the device to generate",
+          tags=["Oscilloscope"])
 def hantek_dso2d15_set_waveform(data: HantekDSO2D15SetWaveform = Depends()) -> None:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     hantek_dso2d15.set_waveform(
         data.freq, data.amp, data.offset, data.typ, data.duty, data.mod, data.mod_type, data.mod_freq, data.mod_depth
     )
 
-@app.get("/oscilloscope/hantek_dso2d15/keypad_lock", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/keypad_lock",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get wether the keypad of the device is locked or not",
+         response_description="Wether the keypad of the device is locked (True) or not (False)",
+         tags=["Oscilloscope"])
 def hantek_dso2d15_keypad_lock_get() -> bool:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return hantek_dso2d15.keypad_lock
 
-@app.post("/oscilloscope/hantek_dso2d15/keypad_lock", tags=["Oscilloscope"])
+@app.post("/oscilloscope/hantek_dso2d15/keypad_lock",
+          responses={
+              404: { "description": "Interface not found" }
+          },
+          summary="Set wether the keypad of the device is locked or not",
+          tags=["Oscilloscope"])
 def hantek_dso2d15_keypad_lock_set(value: bool = True) -> None:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     hantek_dso2d15.keypad_lock = value
 
-@app.get("/oscilloscope/hantek_dso2d15/trigger_status", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/trigger_status",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the trigger status of the device",
+         response_description="Trigger status of the device, True meaning it has been triggered, and False meaning it is waiting to be triggered",
+         tags=["Oscilloscope"])
 def hantek_dso2d15_trigger_status() -> bool:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return hantek_dso2d15.trigger_status
 
-@app.get("/oscilloscope/hantek_dso2d15/frequency", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/frequency",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the measured frequency of the signal",
+         response_description="Measured frequency of the signal, in Hertzs",
+         tags=["Oscilloscope"])
 def hantek_dso2d15_frequency(channel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return hantek_dso2d15.frequency(channel)
 
-@app.get("/oscilloscope/hantek_dso2d15/period", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/period",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the measured period of the signal",
+         response_description="Measured period of the signal, in seconds",
+         tags=["Oscilloscope"])
 def hantek_dso2d15_period(chanel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return hantek_dso2d15.period(channel)
 
-@app.get("/oscilloscope/hantek_dso2d15/rms", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/rms",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the measured RMS voltage of the signal",
+         response_description="Measured RMS voltage of the signal, in Volts",
+         tags=["Oscilloscope"])
 def hantek_dso2d15_rms(channel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return hantek_dso2d15.rms(channel)
 
-@app.get("/oscilloscope/hantek_dso2d15/ppk", tags=["Oscilloscope"])
+@app.get("/oscilloscope/hantek_dso2d15/ppk",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the measured peak-to-peak voltage of the signal",
+         response_description="Measured peak-to-peak voltage of the signal, in Volts",
+         tags=["Oscilloscope"])
 def hantek_dso2d15_ppk(channel: Annotated[Literal[1, 2], BeforeValidator(int)] = 1) -> float:
+    if hantek_dso2d15 is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return hantek_dso2d15.ppk(channel)
 
-@app.get("/awg/feeltech_fy3200s", tags=["AWG"])
+@app.get("/awg/feeltech_fy3200s",
+         responses={
+             404: { "description": "Interface not found" }
+         },
+         summary="Get the identifier of this device",
+         response_description="Identifier of this device",
+         tags=["AWG"])
 def feeltech_fy3200s_id() -> str:
+    if feeltech_fy3200s is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     return feeltech_fy3200s.id
 
 class FeelTechFY3200SSetWaveform(BaseModel):
@@ -282,8 +484,17 @@ class FeelTechFY3200SSetWaveform(BaseModel):
     typ: Annotated[int, Query("Type of the desired wave", ge=0, le=19)] = 0
     phase: Annotated[int, Query("Phase offset of the desired wave", ge=0, le=359)] = 0
 
-@app.post("/awg/feeltech_fy3200s/waveform", tags=["AWG"])
+@app.post("/awg/feeltech_fy3200s/waveform",
+          responses={
+              404: { "description": "Interface not found" }
+          },
+          summary="Set parameters of the desired waveform",
+          description="Set parameters of the desired waveform to generate, be aware that this does NOT turn on or off the selected channel, as the instrument required this to be done manually and physically by the user",
+          tags=["AWG"])
 def feeltech_fy3200s_set(data: FeelTechFY3200SSetWaveform = Depends()) -> None:
+    if feeltech_fy3200s is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     feeltech_fy3200s.set_waveform(
         data.channel, data.freq, data.amp, data.offset, data.duty, feeltech.WaveType(data.typ), data.phase
     )
@@ -295,8 +506,17 @@ class FeelTechFY3200SFSweep(BaseModel):
     time: Annotated[int, Query("Time the sweep should take, in seconds", ge=1, le=99)] = 10
     typ: Annotated[Literal[1, 2], BeforeValidator(int), Query("Wether to make a linear (1) or logarithmic (2) sweep")] = 1
 
-@app.post("/awg/feeltech_fy3200s/fsweep", tags=["AWG"])
-def feeltech_fy3200s_sweep(data: FeelTechFY3200SFSweep = Depends()) -> None:
+@app.post("/awg/feeltech_fy3200s/fsweep",
+          responses={
+              404: { "description": "Interface not found" }
+          },
+          summary="Set parameters of the desired frequency sweep",
+          description="Set parameters of the desired frequency sweep to carry out on this device, be aware that this sweep will be carried out on the main channel, and that this channel MUST be turned on manually, physically, by the user, for this to work as intended",
+          tags=["AWG"])
+def feeltech_fy3200s_fsweep(data: FeelTechFY3200SFSweep = Depends()) -> None:
+    if feeltech_fy3200s is None:
+        raise HTTPException(status_code=404, detail="Interface not found")
+
     feeltech_fy3200s.set_fsweep(1, data.start, data.stop, data.time, data.typ)
     if data.active:
         feeltech_fy3200s.start_fsweep()
