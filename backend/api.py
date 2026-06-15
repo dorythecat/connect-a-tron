@@ -233,7 +233,7 @@ async def keithley2000_display(data: DisplaySettings = Depends()) -> None:
     if keithley2000 is None:
         raise HTTPException(status_code=404, detail="Interface not found")
 
-    keithley2000.display = data.enable
+    keithley2000.display = data.enabled
     keithley2000.text = data.text
 
 @app.get("/dmm/keithley2000/autozero",
