@@ -36,3 +36,6 @@ Every device supported is included on the file. You can deactivate any of these 
 
 # Testing it out
 You can test out the web at http://89.141.111.112:8001 and the API at http://89.141.111.112:8000
+
+# Setting it up
+To set up your own instance of connect-a-tron, simply clone the repo. Make sure your system has the ability to run a [FastAPI program](https://github.com/fastapi/fastapi) and then go ahead and execute `python -m fastapi run backend/api.py --port 8000`, and the API will now be available on port 8000 of your machine. For the web, set up your machine to run a PHP server with `web/index.php` as the index. That should do it!
