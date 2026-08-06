@@ -39,3 +39,12 @@ You can test out the web at http://89.141.111.112:8001 and the API at http://89.
 
 # Setting it up
 To set up your own instance of connect-a-tron, simply clone the repo. Make sure your system has the ability to run a [FastAPI program](https://github.com/fastapi/fastapi) and then go ahead and execute `python -m fastapi run backend/api.py --port 8000`, and the API will now be available on port 8000 of your machine. For the web, set up your machine to run a PHP server with `web/index.php` as the index. That should do it!
+
+If you're on Windows, a quick setup script for your delight, that automatically starts the API (requires git and python to be installed, I'm not a magician):
+```
+git clone https://github.com/dorythecat/connect-a-tron
+cd connect-a-tron
+python -m pip install "fastapi[standard]"
+python -m fastapi run backend/api.py --port 8000
+```
+Then go to `http://localhost:8000` on your browser, and ta-dah! :D
